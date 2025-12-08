@@ -1,0 +1,73 @@
+# Path and File Name : /home/ransomeye/rebuild/ransomeye_ai_core/ci/.github/workflows/ai_core_unit_tests.yml
+# Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
+# Details of functionality of this file: GitHub Actions CI workflow for AI Core unit tests
+
+name: AI Core Unit Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'ransomeye_ai_core/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'ransomeye_ai_core/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: gagan
+          POSTGRES_PASSWORD: gagan
+          POSTGRES_DB: ransomeye
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov
+    
+    - name: Run unit tests
+      env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_NAME: ransomeye
+        DB_USER: gagan
+        DB_PASS: gagan
+        MODEL_STORAGE_DIR: /tmp/test_models
+      run: |
+        cd ransomeye_ai_core
+        pytest tests/ -v --cov=. --cov-report=term-missing
+    
+    - name: Run integration test
+      env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_NAME: ransomeye
+        DB_USER: gagan
+        DB_PASS: gagan
+        MODEL_STORAGE_DIR: /tmp/test_models
+      run: |
+        cd ransomeye_ai_core
+        python ci/test_harness/test_model_upload.py
+

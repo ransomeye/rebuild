@@ -1,0 +1,45 @@
+# Manager Summary Template
+# Timeline-focused summary for management
+
+Generate a manager-level summary for Incident {{ incident_id }}.
+
+## Incident Overview
+{% if alerts %}
+Total Alerts: {{ alerts|length }}
+{% endif %}
+
+{% if timeline %}
+Timeline:
+- Start: {{ timeline.start_time }}
+- End: {{ timeline.end_time }}
+- Duration: {{ timeline.end_time - timeline.start_time }}
+- Events: {{ timeline.events|length }}
+{% endif %}
+
+## Timeline Events
+{% if timeline and timeline.events %}
+{% for event in timeline.events[:10] %}
+- {{ event.timestamp }}: {{ event.alert_type }} ({{ event.severity }})
+{% endfor %}
+{% endif %}
+
+## AI Analysis
+{% if shap_text %}
+{{ shap_text }}
+{% endif %}
+
+## Indicators of Compromise
+{% if iocs %}
+{% for ioc_type, ioc_values in iocs.items() %}
+- {{ ioc_type }}: {{ ioc_values|join(', ') }}
+{% endfor %}
+{% endif %}
+
+## Instructions
+Generate a manager-level summary (3-4 paragraphs) including:
+1. Timeline of events
+2. Key incidents and their impact
+3. Operational impact
+4. Response actions taken
+5. Next steps
+

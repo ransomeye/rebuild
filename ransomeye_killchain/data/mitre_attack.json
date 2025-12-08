@@ -1,0 +1,128 @@
+{
+  "version": "14.1",
+  "name": "MITRE ATT&CK",
+  "description": "MITRE ATT&CK Framework techniques (subset for RansomEye)",
+  "techniques": [
+    {
+      "id": "T1110",
+      "name": "Brute Force",
+      "tactic": "credential-access",
+      "description": "Adversaries may use brute force techniques to gain access to accounts when passwords are unknown or when password hashes are obtained.",
+      "platforms": ["Linux", "Windows", "macOS"]
+    },
+    {
+      "id": "T1021",
+      "name": "Remote Services",
+      "tactic": "lateral-movement",
+      "description": "Adversaries may use remote services to move between systems and access data.",
+      "platforms": ["Linux", "Windows", "macOS"]
+    },
+    {
+      "id": "T1068",
+      "name": "Exploitation for Privilege Escalation",
+      "tactic": "privilege-escalation",
+      "description": "Adversaries may exploit software vulnerabilities to elevate privileges.",
+      "platforms": ["Linux", "Windows", "macOS"]
+    },
+    {
+      "id": "T1543",
+      "name": "Create or Modify System Process",
+      "tactic": "persistence",
+      "description": "Adversaries may create or modify system processes to establish persistence.",
+      "platforms": ["Linux", "Windows", "macOS"]
+    },
+    {
+      "id": "T1041",
+      "name": "Exfiltration Over C2 Channel",
+      "tactic": "exfiltration",
+      "description": "Adversaries may steal data by exfiltrating it over an existing command and control channel.",
+      "platforms": ["Linux", "Windows", "macOS"]
+    },
+    {
+      "id": "T1071",
+      "name": "Application Layer Protocol",
+      "tactic": "command-and-control",
+      "description": "Adversaries may communicate using application layer protocols to avoid detection/network filtering.",
+      "platforms": ["Linux", "Windows", "macOS"]
+    },
+    {
+      "id": "T1562",
+      "name": "Impair Defenses",
+      "tactic": "defense-evasion",
+      "description": "Adversaries may impair security controls to avoid detection.",
+      "platforms": ["Linux", "Windows", "macOS"]
+    },
+    {
+      "id": "T1059",
+      "name": "Command and Scripting Interpreter",
+      "tactic": "execution",
+      "description": "Adversaries may abuse command and script interpreters to execute commands, scripts, or binaries.",
+      "platforms": ["Linux", "Windows", "macOS"]
+    },
+    {
+      "id": "T1083",
+      "name": "File and Directory Discovery",
+      "tactic": "discovery",
+      "description": "Adversaries may enumerate files and directories to understand the environment.",
+      "platforms": ["Linux", "Windows", "macOS"]
+    },
+    {
+      "id": "T1486",
+      "name": "Data Encrypted for Impact",
+      "tactic": "impact",
+      "description": "Adversaries may encrypt data on target systems to interrupt availability and system access.",
+      "platforms": ["Linux", "Windows", "macOS"]
+    }
+  ],
+  "tactics": [
+    {
+      "id": "TA0001",
+      "name": "Initial Access"
+    },
+    {
+      "id": "TA0002",
+      "name": "Execution"
+    },
+    {
+      "id": "TA0003",
+      "name": "Persistence"
+    },
+    {
+      "id": "TA0004",
+      "name": "Privilege Escalation"
+    },
+    {
+      "id": "TA0005",
+      "name": "Defense Evasion"
+    },
+    {
+      "id": "TA0006",
+      "name": "Credential Access"
+    },
+    {
+      "id": "TA0007",
+      "name": "Discovery"
+    },
+    {
+      "id": "TA0008",
+      "name": "Lateral Movement"
+    },
+    {
+      "id": "TA0009",
+      "name": "Collection"
+    },
+    {
+      "id": "TA0010",
+      "name": "Command and Control"
+    },
+    {
+      "id": "TA0011",
+      "name": "Exfiltration"
+    },
+    {
+      "id": "TA0040",
+      "name": "Impact"
+    }
+  ]
+}
+

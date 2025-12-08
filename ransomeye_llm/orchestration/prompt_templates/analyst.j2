@@ -1,0 +1,78 @@
+# Technical Analyst Summary Template
+# Technical, detailed summary with IOCs and SHAP analysis
+
+Generate a technical analyst summary for Incident {{ incident_id }}.
+
+## Incident Details
+{% if alerts %}
+Total Alerts: {{ alerts|length }}
+
+Key Alert Types:
+{% for alert in alerts[:10] %}
+- {{ alert.alert_type }} (Severity: {{ alert.severity }}, Source: {{ alert.source }}, Target: {{ alert.target }})
+{% endfor %}
+{% endif %}
+
+## Timeline Analysis
+{% if timeline %}
+Start Time: {{ timeline.start_time }}
+End Time: {{ timeline.end_time }}
+Total Events: {{ timeline.events|length }}
+
+Event Timeline:
+{% for event in timeline.events %}
+- {{ event.timestamp }}: {{ event.alert_type }}
+  Source: {{ event.source }}, Target: {{ event.target }}
+  Severity: {{ event.severity }}
+  {% if event.mitre_ttp %}MITRE TTP: {{ event.mitre_ttp }}{% endif %}
+{% endfor %}
+{% endif %}
+
+## AI Feature Importance (SHAP Values)
+{% if shap_text %}
+{{ shap_text }}
+{% endif %}
+
+{% if shap_values %}
+Detailed SHAP Analysis:
+{% for feature, value in shap_values.items() %}
+- {{ feature }}: {{ value }} ({{ (value * 100)|round(2) }}% importance)
+{% endfor %}
+{% endif %}
+
+## Indicators of Compromise
+{% if iocs %}
+{% for ioc_type, ioc_values in iocs.items() %}
+### {{ ioc_type|upper }}
+{% for ioc in ioc_values %}
+- {{ ioc }}
+{% endfor %}
+{% endfor %}
+{% endif %}
+
+## MITRE ATT&CK Mapping
+{% if timeline and timeline.events %}
+{% set ttps = [] %}
+{% for event in timeline.events %}
+  {% if event.mitre_ttp and event.mitre_ttp not in ttps %}
+    {% set _ = ttps.append(event.mitre_ttp) %}
+  {% endif %}
+{% endfor %}
+{% if ttps %}
+Identified TTPs:
+{% for ttp in ttps %}
+- {{ ttp }}
+{% endfor %}
+{% endif %}
+{% endif %}
+
+## Instructions
+Generate a comprehensive technical analyst summary (5-7 paragraphs) including:
+1. Detailed technical analysis of the incident
+2. SHAP feature importance explanation
+3. Complete IOC list with context
+4. MITRE ATT&CK TTP mapping
+5. Technical recommendations
+6. Investigation steps taken
+7. Remaining questions and next steps
+

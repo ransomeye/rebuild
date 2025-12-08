@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["name", "version", "risk_level", "steps"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Playbook name"
+    },
+    "version": {
+      "type": "string",
+      "description": "Playbook version"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"],
+      "description": "Risk level of the playbook"
+    },
+    "description": {
+      "type": "string",
+      "description": "Playbook description"
+    },
+    "author": {
+      "type": "string",
+      "description": "Playbook author"
+    },
+    "steps": {
+      "type": "array",
+      "description": "List of playbook steps",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "action", "target"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Step identifier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Step name"
+          },
+          "action": {
+            "type": "string",
+            "description": "Action to execute"
+          },
+          "target": {
+            "type": "object",
+            "description": "Target specification (must use tags or agent_id, not IP)",
+            "properties": {
+              "agent_id": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "object",
+                "description": "Tag-based selector"
+              }
+            }
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Action parameters"
+          },
+          "rollback": {
+            "type": "object",
+            "description": "Rollback action definition",
+            "properties": {
+              "action": {
+                "type": "string"
+              },
+              "parameters": {
+                "type": "object"
+              }
+            }
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "Step timeout in seconds"
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata"
+    }
+  }
+}
+

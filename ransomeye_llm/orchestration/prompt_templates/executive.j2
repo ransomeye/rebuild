@@ -1,0 +1,36 @@
+# Executive Summary Template
+# Brief, impact-focused summary for C-level executives
+
+Generate an executive summary for Incident {{ incident_id }}.
+
+## Context
+{% if alerts %}
+Total Alerts: {{ alerts|length }}
+{% endif %}
+
+{% if timeline %}
+Timeline: {{ timeline.start_time }} to {{ timeline.end_time }}
+{% endif %}
+
+## Key Points
+{% if shap_text %}
+AI Analysis:
+{{ shap_text }}
+{% endif %}
+
+{% if iocs %}
+Indicators of Compromise:
+{% for ioc_type, ioc_values in iocs.items() %}
+- {{ ioc_type }}: {{ ioc_values[:3]|join(', ') }}
+{% endfor %}
+{% endif %}
+
+## Instructions
+Generate a brief executive summary (2-3 paragraphs) focusing on:
+1. Business impact
+2. Risk assessment
+3. Recommended actions
+4. Timeline for resolution
+
+Keep the summary concise and non-technical.
+

@@ -1,0 +1,32 @@
+{
+  "allowed_actions": [
+    "isolate_host",
+    "kill_process",
+    "firewall_block",
+    "quarantine_file",
+    "disable_user",
+    "revoke_token",
+    "agent:execute_command",
+    "agent:isolate",
+    "agent:collect_artifacts",
+    "notify:email",
+    "notify:webhook",
+    "notify:slack",
+    "script:run_script",
+    "run_script",
+    "send_email",
+    "send_webhook"
+  ],
+  "restricted_actions": [
+    "delete_data",
+    "format_disk",
+    "shutdown_system"
+  ],
+  "requires_approval": [
+    "isolate_host",
+    "kill_process",
+    "disable_user",
+    "revoke_token"
+  ]
+}
+
