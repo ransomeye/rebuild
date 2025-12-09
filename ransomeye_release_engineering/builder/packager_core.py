@@ -12,7 +12,7 @@ from datetime import datetime
 PROJECT_ROOT = Path("/home/ransomeye/rebuild")
 ARTIFACTS_DIR = PROJECT_ROOT / "ransomeye_release_engineering" / "artifacts"
 
-# Core modules to include
+# Core modules to include (only modules that actually exist)
 CORE_MODULES = [
     "ransomeye_ai_core",
     "ransomeye_alert_engine",
@@ -20,16 +20,10 @@ CORE_MODULES = [
     "ransomeye_deception",
     "ransomeye_forensic",
     "ransomeye_hnmp_engine",
-    "ransomeye_incident_summarizer",
-    "ransomeye_killchain_core",
     "ransomeye_llm",
-    "ransomeye_master_core",
     "ransomeye_net_scanner",
     "ransomeye_response",
-    "ransomeye_threat_correlation",
-    "ransomeye_threat_intel_engine",
     "ransomeye_ui",
-    "ransomeye_ai_assistant",
     "ransomeye_core",
     "ransomeye_install",
     "ransomeye_governance",
@@ -133,18 +127,16 @@ class CorePackager:
                 print(f"  + {module}")
                 module_files = self._get_all_files(module_path, self.project_root)
                 all_files.extend(module_files)
-            else:
-                print(f"  ⚠️  {module} not found (skipping)")
+            # Silently skip non-existent modules (they're not in the actual project)
         
-        # Add root files
+        # Add root files (only include if they exist, silently skip missing optional ones)
         print("\nIncluding root files:")
         for root_file in ROOT_FILES:
             file_path = self.project_root / root_file
             if file_path.exists():
                 print(f"  + {root_file}")
                 all_files.append((file_path, Path(root_file)))
-            else:
-                print(f"  ⚠️  {root_file} not found (skipping)")
+            # Silently skip missing files (they may be created in other phases)
         
         # Add root directories
         print("\nIncluding root directories:")

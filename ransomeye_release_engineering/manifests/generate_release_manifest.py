@@ -37,9 +37,9 @@ class ManifestGenerator:
         
         for item in self.artifacts_dir.iterdir():
             if item.is_file():
-                # Exclude signature files and manifest files
+                # Exclude signature files, manifest files, and .keep files
                 if not item.name.endswith('.sig') and \
-                   item.name not in ['release_manifest.json', 'SHA256SUMS']:
+                   item.name not in ['release_manifest.json', 'SHA256SUMS', '.keep']:
                     artifacts.append(item)
         
         return sorted(artifacts)

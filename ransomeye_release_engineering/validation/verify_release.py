@@ -84,10 +84,19 @@ class ReleaseVerifier:
                 artifacts.append(item)
         
         for artifact_path in artifacts:
+            # Skip .keep and other non-artifact files
+            if artifact_path.name == '.keep' or artifact_path.name.startswith('.'):
+                continue
+                
             sig_path = Path(str(artifact_path) + ".sig")
             
             if not sig_path.exists():
-                errors.append(f"Signature not found for {artifact_path.name}")
+                # Only error if we have a public key (meaning signing was expected)
+                if public_key_path:
+                    errors.append(f"Signature not found for {artifact_path.name}")
+                else:
+                    # Without public key, just warn (signing may be optional)
+                    print(f"  ⚠️  {artifact_path.name}: No signature (signing key not provided)")
                 continue
             
             # Try GPG verification

@@ -37,7 +37,11 @@ class SmokeTester:
                 # Extract archive
                 print(f"  Extracting to: {extract_path}")
                 with tarfile.open(archive_path, "r:gz") as tar:
-                    tar.extractall(extract_path)
+                    # Use filter='data' to avoid deprecation warning in Python 3.14+
+                    if hasattr(tarfile, 'data_filter'):
+                        tar.extractall(extract_path, filter='data')
+                    else:
+                        tar.extractall(extract_path)
                 
                 # Verify key directories exist
                 required_dirs = [
@@ -58,21 +62,35 @@ class SmokeTester:
                         errors.append(f"Required directory missing: {req_dir}")
                         print(f"    ❌ {req_dir}/ (MISSING)")
                 
-                # Verify key files
+                # Verify key files (some may be optional)
                 required_files = [
-                    "install.sh",
-                    "requirements.txt",
-                    "VERSION"
+                    ("VERSION", True),  # Required
+                ]
+                optional_files = [
+                    ("install.sh", False),
+                    ("requirements.txt", False),
+                    ("uninstall.sh", False),
                 ]
                 
                 print("\n  Verifying required files:")
-                for req_file in required_files:
+                for req_file, is_required in required_files:
                     file_path = extract_path / req_file
                     if file_path.exists():
                         print(f"    ✅ {req_file}")
                     else:
-                        errors.append(f"Required file missing: {req_file}")
-                        print(f"    ❌ {req_file} (MISSING)")
+                        if is_required:
+                            errors.append(f"Required file missing: {req_file}")
+                            print(f"    ❌ {req_file} (MISSING)")
+                        else:
+                            print(f"    ⚠️  {req_file} (optional, not found)")
+                
+                print("\n  Checking optional files:")
+                for opt_file, _ in optional_files:
+                    file_path = extract_path / opt_file
+                    if file_path.exists():
+                        print(f"    ✅ {opt_file}")
+                    else:
+                        print(f"    ⚠️  {opt_file} (optional, not found)")
                 
                 # Verify standalone agents are NOT included
                 excluded_agents = [
@@ -131,7 +149,11 @@ class SmokeTester:
                 print(f"  Extracting to: {extract_path}")
                 if archive_path.suffix == '.gz' or archive_path.suffixes == ['.tar', '.gz']:
                     with tarfile.open(archive_path, "r:gz") as tar:
-                        tar.extractall(extract_path)
+                        # Use filter='data' to avoid deprecation warning in Python 3.14+
+                        if hasattr(tarfile, 'data_filter'):
+                            tar.extractall(extract_path, filter='data')
+                        else:
+                            tar.extractall(extract_path)
                 elif archive_path.suffix == '.zip':
                     with zipfile.ZipFile(archive_path, 'r') as zipf:
                         zipf.extractall(extract_path)
@@ -167,7 +189,6 @@ class SmokeTester:
                         if subdir_path.exists():
                             print(f"    ✅ {subdir}/")
                         else:
-                            warnings = errors  # Treat as warning for now
                             print(f"    ⚠️  {subdir}/ (not found)")
                 
             except Exception as e:

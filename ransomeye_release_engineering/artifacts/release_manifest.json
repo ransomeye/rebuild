@@ -1,0 +1,62 @@
+{
+  "version": "1.2.3",
+  "generated_at": "2025-12-09T10:57:06.331073Z",
+  "artifacts": [
+    {
+      "filename": "ransomeye-core-1.0.0.tar.gz",
+      "sha256": "101328ff68e0557aba6f29ee6aa2b3e5c4e19c85da842c8e75b7f03871a912c9",
+      "size_bytes": 1679862,
+      "size_mb": 1.6,
+      "signed": false
+    },
+    {
+      "filename": "ransomeye-core-1.2.3.tar.gz",
+      "sha256": "35cb68776e26899e90418175ce7adc02a9b5ce716b586f30a4c19f4dac520105",
+      "size_bytes": 1679862,
+      "size_mb": 1.6,
+      "signed": false
+    },
+    {
+      "filename": "ransomeye-dpi-probe-1.0.0.tar.gz",
+      "sha256": "6c01a628c448163e4d69b6077c36df5e8f03f1d981da4f272d74dc19111a6550",
+      "size_bytes": 39438,
+      "size_mb": 0.04,
+      "signed": false
+    },
+    {
+      "filename": "ransomeye-dpi-probe-1.2.3.tar.gz",
+      "sha256": "65d9f309da4c8c06493bf44356f3e237489cd53d8ecabf788a40687546ae9f79",
+      "size_bytes": 39438,
+      "size_mb": 0.04,
+      "signed": false
+    },
+    {
+      "filename": "ransomeye-linux-agent-1.0.0.tar.gz",
+      "sha256": "e1e601d62877abeeda5c5fd35520b398ef68d48faa9ec149a9bbbca32bcc435d",
+      "size_bytes": 28423,
+      "size_mb": 0.03,
+      "signed": false
+    },
+    {
+      "filename": "ransomeye-linux-agent-1.2.3.tar.gz",
+      "sha256": "81c94423126bb41b034e6ff7eefffa46a4b389ce29e35efb62a5c79f294c4257",
+      "size_bytes": 28423,
+      "size_mb": 0.03,
+      "signed": false
+    },
+    {
+      "filename": "ransomeye-windows-agent-1.0.0.zip",
+      "sha256": "1744d3d2a83bc3e6a8d70c2e3e0270605ad500dcad8fdb2adf379f823298ff3d",
+      "size_bytes": 48323,
+      "size_mb": 0.05,
+      "signed": false
+    },
+    {
+      "filename": "ransomeye-windows-agent-1.2.3.zip",
+      "sha256": "1744d3d2a83bc3e6a8d70c2e3e0270605ad500dcad8fdb2adf379f823298ff3d",
+      "size_bytes": 48323,
+      "size_mb": 0.05,
+      "signed": false
+    }
+  ]
+}

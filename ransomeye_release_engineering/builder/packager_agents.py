@@ -113,14 +113,19 @@ class AgentPackager:
         if archive_path.exists():
             archive_path.unlink()
         
-        # Collect all files
+        # Collect all files (installer is already included via recursive walk)
         all_files = self._get_all_files(agent_dir, self.project_root)
         
-        # Also include installer if it exists
-        installer_dir = agent_dir / "installer"
-        if installer_dir.exists():
-            installer_files = self._get_all_files(installer_dir, self.project_root)
-            all_files.extend(installer_files)
+        # Deduplicate files by arcname to avoid zip warnings
+        seen_arcnames = set()
+        unique_files = []
+        for source_path, arcname in all_files:
+            arcname_str = str(arcname)
+            if arcname_str not in seen_arcnames:
+                seen_arcnames.add(arcname_str)
+                unique_files.append((source_path, arcname))
+        
+        all_files = unique_files
         
         if not all_files:
             print("❌ ERROR: No files to package")

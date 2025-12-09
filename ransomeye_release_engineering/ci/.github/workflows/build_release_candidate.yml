@@ -1,0 +1,118 @@
+# Path and File Name : /home/ransomeye/rebuild/ransomeye_release_engineering/ci/.github/workflows/build_release_candidate.yml
+# Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
+# Details of functionality of this file: GitHub Actions workflow for automated release candidate builds
+
+name: Build Release Candidate
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+        default: '1.0.0'
+      skip_gates:
+        description: 'Skip gate checks (NOT RECOMMENDED)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Extract version from tag
+        if: github.event_name == 'push'
+        id: tag_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Set version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${{ steps.tag_version.outputs.version }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+      
+      - name: Import signing key (if available)
+        if: env.RELEASE_SIGN_KEY != ''
+        env:
+          RELEASE_SIGN_KEY: ${{ secrets.RELEASE_SIGN_KEY }}
+        run: |
+          if [ -n "$RELEASE_SIGN_KEY" ]; then
+            echo "$RELEASE_SIGN_KEY" > /tmp/signing_key.pem
+            chmod 600 /tmp/signing_key.pem
+            export RELEASE_SIGN_KEY_PATH=/tmp/signing_key.pem
+          fi
+      
+      - name: Build release artifacts
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          RELEASE_SIGN_KEY_PATH: ${{ env.RELEASE_SIGN_KEY_PATH }}
+        run: |
+          cd /home/ransomeye/rebuild || cd ${{ github.workspace }}
+          python3 ransomeye_release_engineering/builder/build_release.py \
+            --version "${{ steps.version.outputs.version }}" \
+            ${{ github.event.inputs.skip_gates == true && '--skip-gates' || '' }}
+      
+      - name: Verify release artifacts
+        run: |
+          cd /home/ransomeye/rebuild || cd ${{ github.workspace }}
+          python3 ransomeye_release_engineering/validation/verify_release.py
+      
+      - name: Run smoke tests
+        run: |
+          cd /home/ransomeye/rebuild || cd ${{ github.workspace }}
+          python3 ransomeye_release_engineering/validation/final_smoke_test.py
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-artifacts-${{ steps.version.outputs.version }}
+          path: |
+            ransomeye_release_engineering/artifacts/*.tar.gz
+            ransomeye_release_engineering/artifacts/*.zip
+            ransomeye_release_engineering/artifacts/*.sig
+            ransomeye_release_engineering/artifacts/release_manifest.json
+            ransomeye_release_engineering/artifacts/SHA256SUMS
+          retention-days: 30
+      
+      - name: Create release (on tag push)
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ransomeye_release_engineering/artifacts/*.tar.gz
+            ransomeye_release_engineering/artifacts/*.zip
+            ransomeye_release_engineering/artifacts/*.sig
+            ransomeye_release_engineering/artifacts/release_manifest.json
+            ransomeye_release_engineering/artifacts/SHA256SUMS
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
