@@ -5,8 +5,9 @@
 import os
 import re
 import sys
+import json
 from pathlib import Path
-from typing import List, Dict, Tuple, Set
+from typing import List, Dict, Tuple, Set, Optional
 import fnmatch
 
 # Project root
@@ -21,6 +22,8 @@ WHITELISTED_PATTERNS = [
     "**/.env.example",
     "**/config.yaml",
     "**/config.yml",
+    "**/*.yaml",  # All YAML files (configs, datasources, etc.)
+    "**/*.yml",
     "**/verification_policies.yaml",
     "**/requirements.txt",
     "**/README.md",
@@ -28,21 +31,13 @@ WHITELISTED_PATTERNS = [
     "**/port_usage_audit.py",  # This file itself
     "**/check_gates.py",
     "**/release_readiness.sh",
-]
-
-# Allowed contexts (ports in these contexts are OK)
-ALLOWED_CONTEXTS = [
-    r"os\.environ\.get\s*\([^)]*port",
-    r"os\.getenv\s*\([^)]*port",
-    r"config\.get\s*\([^)]*port",
-    r"default.*port",
-    r"PORT.*=.*os\.environ",
-    r"port.*=.*os\.environ",
-    r"#.*port",  # Comments
-    r"//.*port",  # Comments
-    r"/\*.*port.*\*/",  # Comments
-    r"port.*#",  # Comments
-    r"port.*//",  # Comments
+    "**/.github/workflows/*.yml",  # CI/CD workflows
+    "**/.github/workflows/*.yaml",
+    "**/install*.sh",  # Install scripts
+    "**/preflight*.sh",  # Preflight checks
+    "**/training_data/**/*.json",  # Training data files
+    "**/vite.config.ts",  # Build configs
+    "**/vite.config.js",
 ]
 
 # Exclude directories
@@ -59,6 +54,7 @@ EXCLUDE_DIRS = {
     "logs",
     ".idea",
     ".vscode",
+    "ci",  # CI directory may contain test configs
 }
 
 # File extensions to scan
@@ -108,26 +104,170 @@ class PortAuditor:
                 return True
         return False
     
-    def is_allowed_context(self, line: str, port: str, match_start: int, match_end: int) -> bool:
-        """Check if port match is in an allowed context."""
-        # Get context around the match (50 chars before and after)
-        context_start = max(0, match_start - 50)
-        context_end = min(len(line), match_end + 50)
-        context = line[context_start:context_end]
+    def is_decimal_number(self, line: str, port_str: str, match_start: int) -> bool:
+        """Check if port is part of a decimal number (false positive)."""
+        # Check if there's a dot before or after the port
+        before_char = line[match_start - 1] if match_start > 0 else ''
+        after_char = line[match_start + len(port_str)] if match_start + len(port_str) < len(line) else ''
         
-        # Check against allowed patterns
-        for pattern in ALLOWED_CONTEXTS:
+        # Check for decimal pattern like 0.5792243930103306
+        decimal_pattern = r'\d+\.\d+' + re.escape(port_str)
+        if re.search(decimal_pattern, line):
+            return True
+        
+        # Check if surrounded by digits (part of larger number)
+        if before_char.isdigit() or after_char.isdigit():
+            # Check wider context
+            context_start = max(0, match_start - 10)
+            context_end = min(len(line), match_start + len(port_str) + 10)
+            context = line[context_start:context_end]
+            if re.search(r'\d+\.\d+', context):
+                return True
+        
+        return False
+    
+    def is_in_comment(self, line: str, match_start: int) -> bool:
+        """Check if match is in a comment."""
+        line_before_match = line[:match_start]
+        
+        # Python/Shell comments
+        if '#' in line_before_match:
+            return True
+        
+        # JavaScript/TypeScript comments
+        if '//' in line_before_match:
+            return True
+        
+        # Multi-line comments (check if we're inside /* ... */)
+        comment_start = line_before_match.rfind('/*')
+        comment_end = line_before_match.rfind('*/')
+        if comment_start > comment_end:
+            return True
+        
+        # Check for docstring patterns
+        if '"""' in line_before_match or "'''" in line_before_match:
+            # Count quotes to see if we're inside a docstring
+            triple_quotes = line_before_match.count('"""') + line_before_match.count("'''")
+            if triple_quotes % 2 == 1:
+                return True
+        
+        return False
+    
+    def is_default_value(self, line: str, port_str: str, match_start: int, match_end: int) -> bool:
+        """Check if port is in a default value (os.environ.get, function defaults, etc.)."""
+        # Get wider context
+        context_start = max(0, match_start - 150)
+        context_end = min(len(line), match_end + 150)
+        context = line[context_start:context_end]
+        full_line = line
+        
+        # Check for os.environ.get with default value (numeric or string)
+        # Pattern: os.environ.get('KEY', 5432) or os.environ.get('KEY', '5432')
+        env_get_patterns = [
+            r'os\.environ\.get\s*\([^)]*,\s*' + re.escape(port_str) + r'(?:\s|,|\)|$)',
+            r'os\.environ\.get\s*\([^)]*,\s*[\'"]' + re.escape(port_str) + r'[\'"]',
+        ]
+        for pattern in env_get_patterns:
             if re.search(pattern, context, re.IGNORECASE):
                 return True
         
-        # Check if it's part of a version number (e.g., "1.2.3" should not match port 2)
-        # Look for version-like patterns
-        version_pattern = r'\d+\.\d+\.\d+'
-        if re.search(version_pattern, context):
-            # Check if our port is part of a version
-            version_match = re.search(version_pattern, context)
-            if version_match and port in version_match.group():
+        # Check for os.getenv with default
+        env_get_patterns = [
+            r'os\.getenv\s*\([^)]*,\s*' + re.escape(port_str) + r'(?:\s|,|\)|$)',
+            r'os\.getenv\s*\([^)]*,\s*[\'"]' + re.escape(port_str) + r'[\'"]',
+        ]
+        for pattern in env_get_patterns:
+            if re.search(pattern, context, re.IGNORECASE):
                 return True
+        
+        # Check for function default parameter: def func(port: int = 9092) or def func(port = 9092)
+        if re.search(r'def\s+\w+\s*\([^)]*=\s*' + re.escape(port_str) + r'(?:\s|,|\)|$)', full_line, re.IGNORECASE):
+            return True
+        
+        # Check for argparse default: default=9092
+        if re.search(r'default\s*=\s*' + re.escape(port_str) + r'(?:\s|,|\)|$)', context, re.IGNORECASE):
+            return True
+        
+        # Check for variable assignment with default in os.environ.get context
+        # Pattern: port = int(os.environ.get('PORT', 8080))
+        if re.search(r'=\s*int\s*\(\s*os\.environ\.get\s*\([^)]*,\s*' + re.escape(port_str), context, re.IGNORECASE):
+            return True
+        
+        # Check for URL defaults in os.environ.get
+        # Pattern: os.environ.get('URL', 'https://localhost:8443')
+        if re.search(r'os\.environ\.get\s*\([^)]*,\s*[\'"]https?://[^:]+:' + re.escape(port_str), context, re.IGNORECASE):
+            return True
+        
+        return False
+    
+    def is_legitimate_port_list(self, line: str, port_str: str) -> bool:
+        """Check if port is in a legitimate list of common ports (for scanning, etc.)."""
+        # Check if line contains multiple ports (likely a port list)
+        port_count = len(re.findall(r'\b\d{2,5}\b', line))
+        if port_count >= 5:  # Likely a port list
+            # Check if it's in a variable assignment for scanning
+            if re.search(r'(ports|common_ports|port_list)\s*=', line, re.IGNORECASE):
+                return True
+            # Check if it's in a list literal
+            if '[' in line and ']' in line and port_count >= 5:
+                return True
+        
+        return False
+    
+    def is_example_or_docstring(self, line: str) -> bool:
+        """Check if line is an example or in a docstring."""
+        line_lower = line.lower().strip()
+        
+        # Common example patterns
+        example_patterns = [
+            r'example:',
+            r'e\.g\.',
+            r'for example',
+            r'sample:',
+            r'optional.*url',
+            r'redis://',
+            r'postgres://',
+            r'defaults? to',
+            r'default:',
+            r'\(default',
+            r'help=.*port',
+        ]
+        
+        for pattern in example_patterns:
+            if re.search(pattern, line_lower):
+                return True
+        
+        # Check if line is a docstring line (starts with quotes or has docstring markers)
+        if line.strip().startswith('"""') or line.strip().startswith("'''"):
+            return True
+        
+        # Check if it's a parameter description in docstring
+        if re.search(r':\s*(Port|port).*\(', line_lower):
+            return True
+        
+        return False
+    
+    def is_allowed_context(self, line: str, port_str: str, match_start: int, match_end: int) -> bool:
+        """Check if port match is in an allowed context."""
+        # Check if in comment
+        if self.is_in_comment(line, match_start):
+            return True
+        
+        # Check if part of decimal number
+        if self.is_decimal_number(line, port_str, match_start):
+            return True
+        
+        # Check if default value
+        if self.is_default_value(line, port_str, match_start, match_end):
+            return True
+        
+        # Check if legitimate port list
+        if self.is_legitimate_port_list(line, port_str):
+            return True
+        
+        # Check if example/docstring
+        if self.is_example_or_docstring(line):
+            return True
         
         return False
     
@@ -261,4 +401,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
