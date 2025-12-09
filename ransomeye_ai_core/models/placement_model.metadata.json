@@ -1,0 +1,24 @@
+{
+  "trained_at": "2025-12-09T08:32:52.558671",
+  "training_samples": 10000,
+  "train_score_r2": 0.8767941850832788,
+  "feature_importance": {
+    "host_criticality": 0.49385692756860095,
+    "segment_hash": 0.23672877773412956,
+    "existing_density": 0.19811492895072946,
+    "decoy_type_hash": 0.020567761980880988,
+    "type_specific_feature": 0.05073160376565905
+  },
+  "model_params": {
+    "n_estimators": 300,
+    "max_depth": 8,
+    "learning_rate": 0.03,
+    "subsample": 0.85
+  },
+  "data_source": "Security research-based synthetic data",
+  "research_basis": [
+    "Honeypot effectiveness studies (Spitzner 2003)",
+    "Network deception placement (Al-Shaer 2019)",
+    "Threat intelligence patterns (MITRE ATT&CK)"
+  ]
+}

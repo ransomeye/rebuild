@@ -1,0 +1,31 @@
+{
+  "blocked_keywords": [
+    "password",
+    "secret",
+    "api_key",
+    "token",
+    "credential",
+    "delete all",
+    "format",
+    "rm -rf",
+    "drop table",
+    "malware",
+    "exploit",
+    "hack",
+    "crack"
+  ],
+  "blocked_patterns": [
+    "password\\s*[:=]\\s*\\S+",
+    "api[_-]?key\\s*[:=]\\s*\\S+",
+    "secret\\s*[:=]\\s*\\S+",
+    "rm\\s+-rf",
+    "drop\\s+table",
+    "delete\\s+from\\s+\\w+"
+  ],
+  "allowed_domains": [],
+  "max_input_length": 10000,
+  "max_output_length": 50000,
+  "require_verification": true,
+  "block_unsafe_commands": true
+}
+

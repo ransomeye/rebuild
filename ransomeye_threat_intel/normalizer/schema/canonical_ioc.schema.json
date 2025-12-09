@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Canonical IOC Schema",
+  "description": "Strict JSON schema for normalized IOC objects",
+  "type": "object",
+  "required": ["value", "type"],
+  "properties": {
+    "value": {
+      "type": "string",
+      "description": "Normalized IOC value"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["ipv4", "ipv6", "domain", "url", "hash", "email", "unknown"],
+      "description": "IOC type"
+    },
+    "source": {
+      "type": "string",
+      "description": "Source identifier"
+    },
+    "source_id": {
+      "type": "string",
+      "description": "Source-specific ID"
+    },
+    "first_seen": {
+      "type": "string",
+      "format": "date-time",
+      "description": "First seen timestamp (ISO 8601)"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last seen timestamp (ISO 8601)"
+    },
+    "description": {
+      "type": "string",
+      "description": "IOC description"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags/labels"
+    },
+    "confidence": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Confidence score (0-100)"
+    },
+    "normalized_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Normalization timestamp"
+    },
+    "enrichment": {
+      "type": "object",
+      "properties": {
+        "geoip": {
+          "type": "object",
+          "properties": {
+            "country": {"type": "string"},
+            "city": {"type": "string"},
+            "latitude": {"type": "number"},
+            "longitude": {"type": "number"}
+          }
+        },
+        "asn": {
+          "type": "object",
+          "properties": {
+            "asn": {"type": "integer"},
+            "asn_org": {"type": "string"}
+          }
+        }
+      }
+    },
+    "raw": {
+      "type": "object",
+      "description": "Original raw data"
+    }
+  }
+}
+

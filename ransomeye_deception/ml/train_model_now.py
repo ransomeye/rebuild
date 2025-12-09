@@ -8,7 +8,7 @@ import pickle
 import json
 from pathlib import Path
 from typing import Dict, Any, List, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import random
 
@@ -327,7 +327,7 @@ class SecurityResearchTrainer:
             
             # Save metadata
             metadata = {
-                'trained_at': datetime.utcnow().isoformat(),
+                'trained_at': datetime.now(timezone.utc).isoformat(),
                 'training_samples': len(X),
                 'train_score_r2': float(train_score),
                 'feature_importance': feature_importance,
