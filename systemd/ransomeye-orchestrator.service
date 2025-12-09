@@ -1,0 +1,34 @@
+# Path and File Name : /home/ransomeye/rebuild/systemd/ransomeye-orchestrator.service
+# Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
+# Details of functionality of this file: Systemd service unit for RansomEye Orchestrator
+
+[Unit]
+Description=RansomEye Master Flow Orchestrator Service
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=ransomeye
+Group=ransomeye
+WorkingDirectory=/home/ransomeye/rebuild
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONPATH=/home/ransomeye/rebuild"
+EnvironmentFile=/home/ransomeye/rebuild/ransomeye_core/config/.env
+ExecStart=/usr/bin/python3 -m ransomeye_orchestrator.orchestrator_service
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ransomeye-orchestrator
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ransomeye/rebuild/logs /home/ransomeye/rebuild/data
+
+[Install]
+WantedBy=multi-user.target
+
