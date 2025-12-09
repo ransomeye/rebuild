@@ -1,0 +1,34 @@
+# Path and File Name : /home/ransomeye/rebuild/systemd/ransomeye-assistant-advanced.service
+# Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
+# Details of functionality of this file: Systemd service unit for RansomEye Advanced SOC Copilot API (Phase 15)
+
+[Unit]
+Description=RansomEye Advanced SOC Copilot API Service (Multi-Modal & Playbook Routing)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=ransomeye
+Group=ransomeye
+WorkingDirectory=/home/ransomeye/rebuild
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONPATH=/home/ransomeye/rebuild"
+EnvironmentFile=/home/ransomeye/rebuild/ransomeye_assistant_advanced/config/.env
+ExecStart=/usr/bin/python3 -m uvicorn ransomeye_assistant_advanced.api.assistant_api:app --host 0.0.0.0 --port 8008
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ransomeye-assistant-advanced
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ransomeye/rebuild/logs /var/lib/ransomeye/assistant_advanced
+
+[Install]
+WantedBy=multi-user.target
+
