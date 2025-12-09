@@ -1,0 +1,37 @@
+/* Path and File Name : /home/ransomeye/rebuild/ransomeye_ui/app/src/components/Layout/Layout.css */
+/* Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU */
+/* Details of functionality of this file: Layout component styles */
+
+.app-nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.nav-link:hover {
+  color: var(--accent-color);
+  background-color: rgba(0, 212, 255, 0.1);
+}
+
+.nav-link.active {
+  color: var(--accent-color);
+  background-color: rgba(0, 212, 255, 0.2);
+  font-weight: bold;
+}
+
+.app-footer {
+  background-color: var(--secondary-color);
+  border-top: 1px solid var(--border-color);
+  padding: 1rem 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+

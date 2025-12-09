@@ -1,0 +1,130 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "RansomEye Dashboard Schema",
+  "description": "JSON schema for RansomEye dashboard definitions",
+  "required": ["id", "name", "layout", "widgets", "schema_version"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique dashboard identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Dashboard display name",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional dashboard description"
+    },
+    "layout": {
+      "type": "array",
+      "description": "React Grid Layout configuration",
+      "items": {
+        "type": "object",
+        "required": ["i", "x", "y", "w", "h"],
+        "properties": {
+          "i": {
+            "type": "string",
+            "description": "Widget identifier"
+          },
+          "x": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "X position in grid"
+          },
+          "y": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Y position in grid"
+          },
+          "w": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Width in grid units"
+          },
+          "h": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Height in grid units"
+          },
+          "minW": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minH": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxW": {
+            "type": "integer"
+          },
+          "maxH": {
+            "type": "integer"
+          },
+          "static": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "widgets": {
+      "type": "array",
+      "description": "Dashboard widget configurations",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "title"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique widget identifier"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["chart", "table", "metric", "alert", "map", "timeline"],
+            "description": "Widget type"
+          },
+          "title": {
+            "type": "string",
+            "description": "Widget display title"
+          },
+          "dataSource": {
+            "type": "string",
+            "description": "Data source identifier"
+          },
+          "query": {
+            "type": "object",
+            "description": "Widget query configuration"
+          },
+          "config": {
+            "type": "object",
+            "description": "Widget-specific configuration"
+          }
+        }
+      }
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Schema version (semver)"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp (ISO 8601)"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp (ISO 8601)"
+    },
+    "is_default": {
+      "type": "boolean",
+      "description": "Whether this is the default dashboard"
+    }
+  }
+}
+

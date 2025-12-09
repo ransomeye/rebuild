@@ -1,0 +1,110 @@
+/* Path and File Name : /home/ransomeye/rebuild/ransomeye_ui/app/src/components/ModelRegistry/ModelList.css */
+/* Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU */
+/* Details of functionality of this file: Model list component styles */
+
+.model-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.model-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.model-table-container {
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.model-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--secondary-color);
+}
+
+.model-table thead {
+  background-color: var(--primary-color);
+}
+
+.model-table th {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: bold;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.model-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.model-table tbody tr:hover {
+  background-color: rgba(0, 212, 255, 0.05);
+}
+
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-active {
+  background-color: var(--success-color);
+  color: var(--primary-color);
+}
+
+.status-inactive {
+  background-color: var(--text-secondary);
+  color: var(--primary-color);
+}
+
+.status-deprecated {
+  background-color: var(--error-color);
+  color: var(--text-primary);
+}
+
+.status-unknown {
+  background-color: var(--warning-color);
+  color: var(--primary-color);
+}
+
+.sha256-cell {
+  font-family: monospace;
+  font-size: 0.875rem;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.empty-message {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+.model-list-loading,
+.model-list-error {
+  text-align: center;
+  padding: 2rem;
+}
+
+.model-list-error {
+  color: var(--error-color);
+}
+
+.offline-notice {
+  padding: 1rem;
+  background-color: rgba(255, 170, 0, 0.1);
+  border: 1px solid var(--warning-color);
+  border-radius: 4px;
+  color: var(--warning-color);
+}
+

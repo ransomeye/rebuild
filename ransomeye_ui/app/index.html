@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RansomEye - Cyber Security Platform</title>
+    <script>
+      // Runtime configuration injection
+      window.__RUNTIME_CONFIG__ = {
+        API_URL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
+        GRAFANA_URL: import.meta.env.VITE_GRAFANA_URL || 'http://localhost:3001',
+        UI_PORT: import.meta.env.VITE_UI_PORT || '3000'
+      };
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

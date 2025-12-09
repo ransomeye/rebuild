@@ -1,0 +1,39 @@
+# Path and File Name : /home/ransomeye/rebuild/systemd/ransomeye-grafana.service
+# Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
+# Details of functionality of this file: Systemd service unit for RansomEye Grafana on port 3001
+
+[Unit]
+Description=RansomEye Grafana Service
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=ransomeye
+Group=ransomeye
+WorkingDirectory=/home/ransomeye/rebuild/ransomeye_ui/grafana
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="GF_PATHS_CONFIG=/home/ransomeye/rebuild/ransomeye_ui/grafana/config/custom.ini"
+Environment="GF_PATHS_DATA=/home/ransomeye/rebuild/ransomeye_ui/grafana/data"
+Environment="GF_PATHS_LOGS=/home/ransomeye/rebuild/logs/grafana"
+Environment="GF_PATHS_PLUGINS=/home/ransomeye/rebuild/ransomeye_ui/grafana/plugins"
+Environment="GF_PATHS_PROVISIONING=/home/ransomeye/rebuild/ransomeye_ui/grafana/provisioning"
+EnvironmentFile=/home/ransomeye/rebuild/ransomeye_core/config/.env
+# Run Grafana server with custom config (port 3001)
+ExecStart=/home/ransomeye/rebuild/ransomeye_ui/grafana/bin/grafana-server --config=/home/ransomeye/rebuild/ransomeye_ui/grafana/config/custom.ini
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ransomeye-grafana
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ransomeye/rebuild/logs/grafana /home/ransomeye/rebuild/ransomeye_ui/grafana/data
+
+[Install]
+WantedBy=multi-user.target
+

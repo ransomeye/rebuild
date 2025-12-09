@@ -1,0 +1,35 @@
+# Path and File Name : /home/ransomeye/rebuild/systemd/ransomeye-ui.service
+# Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
+# Details of functionality of this file: Systemd service unit for RansomEye React UI on port 3000
+
+[Unit]
+Description=RansomEye React UI Service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=ransomeye
+Group=ransomeye
+WorkingDirectory=/home/ransomeye/rebuild/ransomeye_ui/app
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONPATH=/home/ransomeye/rebuild"
+EnvironmentFile=/home/ransomeye/rebuild/ransomeye_core/config/.env
+# Serve built React app on port 3000
+ExecStart=/usr/bin/npx serve -s dist -l 3000
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ransomeye-ui
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ransomeye/rebuild/logs /home/ransomeye/rebuild/ransomeye_ui/app/dist
+
+[Install]
+WantedBy=multi-user.target
+

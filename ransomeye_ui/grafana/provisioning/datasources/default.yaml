@@ -1,0 +1,22 @@
+# Path and File Name : /home/ransomeye/rebuild/ransomeye_ui/grafana/provisioning/datasources/default.yaml
+# Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
+# Details of functionality of this file: Grafana datasource provisioning for PostgreSQL from Phase 10
+
+apiVersion: 1
+
+datasources:
+  - name: RansomEye PostgreSQL
+    type: postgres
+    access: proxy
+    url: localhost:5432
+    database: ransomeye
+    user: gagan
+    secureJsonData:
+      password: gagan
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1300
+      timescaledb: false
+    isDefault: true
+    editable: true
+
