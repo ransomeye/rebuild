@@ -22,7 +22,14 @@ from ..storage.artifact_store import ArtifactStore
 from ..storage.provenance import ProvenanceTracker
 from ..feedback.feedback_collector import FeedbackCollector
 from ..explain.shap_integration import SHAPIntegration
-from ..metrics.exporter import setup_metrics_endpoint
+from ..metrics.exporter import (
+    setup_metrics_endpoint,
+    record_ingest,
+    record_ocr_latency,
+    record_vision_latency,
+    record_playbook_suggestion,
+    record_feedback
+)
 from .auth_middleware import verify_token
 
 logging.basicConfig(level=logging.INFO)
@@ -120,8 +127,15 @@ async def ingest_artifact(
         # Generate artifact ID
         artifact_id = str(uuid.uuid4())
         
-        # Process with multi-modal pipeline
+        # Process with multi-modal pipeline (with timing for metrics)
+        import time
+        start_time = time.time()
         result = multi_modal.process_artifact(temp_path, artifact_id)
+        processing_time = time.time() - start_time
+        
+        # Record metrics
+        record_ingest(file.content_type or 'unknown')
+        # Note: OCR and vision latencies are recorded within multi_modal pipeline
         
         # Store artifact
         artifact_store.store_artifact(
@@ -224,6 +238,9 @@ async def suggest_playbook(
         
         logger.info(f"Suggested playbook: {suggestion['playbook_id']} for summary: {summary[:50]}...")
         
+        # Record metrics
+        record_playbook_suggestion(suggestion['playbook_id'], suggestion['confidence'])
+        
         return SuggestPlaybookResponse(
             playbook_id=suggestion['playbook_id'],
             playbook_name=suggestion['playbook_name'],
@@ -268,6 +285,9 @@ async def submit_feedback(
             accepted=accepted,
             comment=comment
         )
+        
+        # Record metrics
+        record_feedback(accepted)
         
         return {
             "artifact_id": artifact_id,

@@ -47,7 +47,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(security))
 
 def verify_mtls():
     """
-    Verify mTLS certificate (placeholder for future implementation).
+    Verify mTLS certificate (future implementation).
     
     Returns:
         Certificate subject if valid
@@ -55,8 +55,9 @@ def verify_mtls():
     Raises:
         HTTPException: If certificate is invalid
     """
-    # TODO: Implement mTLS verification
-    # This would check client certificate in request context
+    # Note: mTLS verification requires client certificate in request context
+    # This would be implemented using FastAPI's Request object to access
+    # SSL client certificate from the connection
     raise HTTPException(
         status_code=501,
         detail="mTLS authentication not yet implemented"

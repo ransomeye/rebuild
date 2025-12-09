@@ -140,10 +140,14 @@ class PlaybookMatcher:
             Dictionary with playbook_id, playbook_name, confidence, and reasoning
         """
         # Combine text and context
+        # Convert detected objects to bag-of-words representation
         full_text = text
         if context:
             if context.get('detected_objects'):
-                full_text += " " + " ".join(context['detected_objects'])
+                # Add detected objects as space-separated tokens (bag-of-words)
+                # TfidfVectorizer will treat these as features
+                detected_objects_text = " ".join(context['detected_objects'])
+                full_text += " " + detected_objects_text
         
         if self.model and self.vectorizer and SKLEARN_AVAILABLE:
             # Use ML model

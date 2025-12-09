@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "max_rate_per_second": 1,
+  "allowed_targets": ["localhost", "127.0.0.1"],
+  "probe_types": ["file", "service"],
+  "safe_mode": true,
+  "max_duration_seconds": 300,
+  "require_confirmation": false
+}
+

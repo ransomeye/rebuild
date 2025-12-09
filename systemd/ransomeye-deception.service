@@ -1,0 +1,34 @@
+# Path and File Name : /home/ransomeye/rebuild/systemd/ransomeye-deception.service
+# Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
+# Details of functionality of this file: Systemd service unit for RansomEye Deception Framework API
+
+[Unit]
+Description=RansomEye Deception Framework API Service
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=ransomeye
+Group=ransomeye
+WorkingDirectory=/home/ransomeye/rebuild
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONPATH=/home/ransomeye/rebuild"
+EnvironmentFile=/home/ransomeye/rebuild/ransomeye_deception/config/.env
+ExecStart=/usr/bin/python3 -m uvicorn ransomeye_deception.api.deception_api:app --host 0.0.0.0 --port 8010
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ransomeye-deception
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ransomeye/rebuild/logs /home/ransomeye/rebuild/ransomeye_deception/artifacts /tmp
+
+[Install]
+WantedBy=multi-user.target
+
