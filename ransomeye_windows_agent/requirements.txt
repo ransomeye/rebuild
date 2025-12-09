@@ -1,0 +1,18 @@
+# Path and File Name : /home/ransomeye/rebuild/ransomeye_windows_agent/requirements.txt
+# Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
+# Details of functionality of this file: Standalone requirements for Windows Agent (pywin32, psutil, requests, scikit-learn, shap)
+
+# Windows-specific dependencies
+pywin32>=306; sys_platform == "win32"
+pywintrace>=0.1.0; sys_platform == "win32"
+
+# Core dependencies
+requests>=2.31.0
+psutil>=5.9.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+shap>=0.42.0
+
+# Optional but recommended
+cryptography>=41.0.0
+

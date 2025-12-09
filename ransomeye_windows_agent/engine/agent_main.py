@@ -17,6 +17,7 @@ sys.path.insert(0, str(project_root))
 from .collector_etw import ETWCollector
 from .detector import Detector
 from .persistence import PersistenceManager
+from .metrics_server import MetricsServer
 from ..transport.heartbeat import HeartbeatManager
 from ..transport.uploader import Uploader
 from ..security.config_validator import ConfigValidator
@@ -39,6 +40,7 @@ class AgentMain:
         self.persistence = None
         self.heartbeat = None
         self.uploader = None
+        self.metrics_server = None
         self.collector_thread = None
         self.uploader_thread = None
         
@@ -68,6 +70,9 @@ class AgentMain:
             # Initialize transport components
             self.heartbeat = HeartbeatManager()
             self.uploader = Uploader(persistence=self.persistence)
+            
+            # Initialize metrics server
+            self.metrics_server = MetricsServer()
             
             logger.info("All components initialized successfully")
         
@@ -100,6 +105,10 @@ class AgentMain:
             daemon=True
         )
         heartbeat_thread.start()
+        
+        # Start metrics server
+        if self.metrics_server:
+            self.metrics_server.start()
         
         logger.info("All threads started")
     
@@ -178,6 +187,10 @@ class AgentMain:
         # Stop heartbeat
         if self.heartbeat:
             self.heartbeat.stop()
+        
+        # Stop metrics server
+        if self.metrics_server:
+            self.metrics_server.stop()
         
         # Stop collector
         if self.collector:

@@ -105,9 +105,22 @@ class ETWCollector:
             logger.error(f"Error collecting events: {e}", exc_info=True)
     
     def _collect_from_etw(self) -> Optional[Dict[str, Any]]:
-        """Collect events from ETW session."""
-        # Placeholder for ETW collection
-        # In production, would use pywintrace or ctypes to call Windows ETW APIs
+        """
+        Collect events from ETW session.
+        
+        Note: Full ETW implementation requires pywintrace or direct Windows API calls via ctypes.
+        This method is a placeholder that returns None, causing fallback to EventLog/psutil.
+        For production ETW support, implement using:
+        - pywintrace library (if available)
+        - ctypes calls to Windows ETW APIs (StartTrace, ProcessTrace, etc.)
+        - Or use existing ETW tools like logman/perfview
+        
+        Returns:
+            None (triggers fallback to EventLog/psutil)
+        """
+        # ETW implementation would go here
+        # For now, return None to trigger fallback
+        logger.debug("ETW collection not fully implemented, using EventLog fallback")
         return None
     
     def _collect_from_eventlog_and_psutil(self) -> Dict[str, Any]:
