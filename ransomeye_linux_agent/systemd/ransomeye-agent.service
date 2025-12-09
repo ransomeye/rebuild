@@ -1,0 +1,37 @@
+# Path and File Name : /home/ransomeye/rebuild/ransomeye_linux_agent/systemd/ransomeye-agent.service
+# Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
+# Details of functionality of this file: systemd service unit for RansomEye Linux Agent
+
+[Unit]
+Description=RansomEye Linux Agent
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ransomeye
+Group=ransomeye
+WorkingDirectory=/opt/ransomeye-agent
+Environment="PYTHONPATH=/opt/ransomeye-agent"
+Environment="CORE_API_URL=https://localhost:8443"
+Environment="AGENT_CERT_PATH=/etc/ransomeye-agent/certs/agent.crt"
+Environment="AGENT_KEY_PATH=/etc/ransomeye-agent/certs/agent.key"
+Environment="CA_CERT_PATH=/etc/ransomeye-agent/certs/ca.crt"
+Environment="AGENT_UPDATE_KEY_PATH=/etc/ransomeye-agent/keys/update_key.pub"
+Environment="BUFFER_DIR=/var/lib/ransomeye-agent/buffer"
+Environment="MODEL_PATH=/opt/ransomeye-agent/models/detector_model.pkl"
+Environment="DETECTION_THRESHOLD=0.7"
+Environment="HEARTBEAT_INTERVAL=60"
+Environment="COLLECTION_INTERVAL=5.0"
+Environment="UPLOAD_BATCH_SIZE=10"
+Environment="MONITOR_DIRS=/tmp,/var/tmp,/home"
+Environment="AGENT_METRICS_PORT=9110"
+ExecStart=/usr/bin/python3 /opt/ransomeye-agent/engine/agent_main.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
