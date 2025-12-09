@@ -72,23 +72,19 @@ class MemoryDiffer:
         hash_map_a = {}
         hash_map_b = {}
         
-        # Process snapshot A
+        # Process snapshot A - use page-based approach for efficiency
         logger.info("Processing snapshot A...")
-        position_a = 0
-        for chunk in reader_a.read_chunks(self.chunk_size):
-            for pos, window, hash_val in self.rolling_hash.hash_stream(iter([chunk]), self.chunk_size):
-                abs_pos = position_a + pos
-                hash_map_a[abs_pos] = (hash_val, window)
-            position_a += len(chunk)
+        for page_num, page_data in reader_a.read_pages():
+            if len(page_data) >= self.window_size:
+                hash_val = self.rolling_hash.compute_hash(page_data[:self.window_size])
+                hash_map_a[page_num * 4096] = (hash_val, page_data[:self.window_size])
         
         # Process snapshot B
         logger.info("Processing snapshot B...")
-        position_b = 0
-        for chunk in reader_b.read_chunks(self.chunk_size):
-            for pos, window, hash_val in self.rolling_hash.hash_stream(iter([chunk]), self.chunk_size):
-                abs_pos = position_b + pos
-                hash_map_b[abs_pos] = (hash_val, window)
-            position_b += len(chunk)
+        for page_num, page_data in reader_b.read_pages():
+            if len(page_data) >= self.window_size:
+                hash_val = self.rolling_hash.compute_hash(page_data[:self.window_size])
+                hash_map_b[page_num * 4096] = (hash_val, page_data[:self.window_size])
         
         # Compare hash maps
         all_positions = set(hash_map_a.keys()) | set(hash_map_b.keys())
@@ -142,18 +138,10 @@ class MemoryDiffer:
         total_removed = len(removed_pages)
         total_unchanged = len(unchanged_pages)
         
-        # Calculate entropy maps for overall comparison
+        # Calculate entropy maps for overall comparison (streaming)
         logger.info("Calculating entropy maps...")
-        entropy_map_a = self.entropy_calc.calculate_entropy_map(
-            self._read_full_snapshot(snapshot_a_path),
-            window_size=4096,
-            step=1024
-        )
-        entropy_map_b = self.entropy_calc.calculate_entropy_map(
-            self._read_full_snapshot(snapshot_b_path),
-            window_size=4096,
-            step=1024
-        )
+        entropy_map_a = self._calculate_entropy_map_streaming(reader_a, window_size=4096, step=1024)
+        entropy_map_b = self._calculate_entropy_map_streaming(reader_b, window_size=4096, step=1024)
         avg_entropy_delta = self.entropy_calc.calculate_entropy_delta(entropy_map_a, entropy_map_b)
         
         # Build result
@@ -189,19 +177,50 @@ class MemoryDiffer:
         
         return result
     
-    def _read_full_snapshot(self, snapshot_path: str) -> bytes:
+    def _calculate_entropy_map_streaming(
+        self,
+        reader: SnapshotReader,
+        window_size: int = 4096,
+        step: int = 1024
+    ) -> list:
         """
-        Read full snapshot into memory (for entropy calculation).
-        Use with caution for very large files.
+        Calculate entropy map using streaming (does not load full file).
         
         Args:
-            snapshot_path: Path to snapshot
+            reader: SnapshotReader instance
+            window_size: Size of sliding window
+            step: Step size between windows
             
         Returns:
-            Full snapshot bytes
+            List of (position, entropy) tuples
         """
-        with open(snapshot_path, 'rb') as f:
-            return f.read()
+        entropy_map = []
+        position = 0
+        buffer = b''
+        
+        # Read in chunks and process windows
+        for chunk in reader.read_chunks(chunk_size=step * 4):  # Read larger chunks for efficiency
+            buffer += chunk
+            
+            # Process complete windows
+            while len(buffer) >= window_size:
+                window = buffer[:window_size]
+                entropy = self.entropy_calc.calculate_entropy(window)
+                entropy_map.append((position, entropy))
+                
+                # Slide window by step
+                buffer = buffer[step:]
+                position += step
+                
+                # Limit to prevent excessive memory usage
+                if len(entropy_map) > 10000:  # Limit to 10k samples
+                    logger.warning("Entropy map truncated to prevent excessive memory usage")
+                    break
+            
+            if len(entropy_map) > 10000:
+                break
+        
+        return entropy_map
     
     def diff_by_snapshot_ids(
         self,

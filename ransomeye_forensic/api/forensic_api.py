@@ -23,6 +23,7 @@ from ..capture.pii_redactor import PIIRedactor
 from ..ledger.evidence_ledger import EvidenceLedger
 from ..ledger.manifest_signer import ManifestSigner
 from ..storage.artifact_store import ArtifactStore
+from .routes import analysis_router
 import hashlib
 
 logging.basicConfig(level=logging.INFO)
@@ -43,6 +44,9 @@ app = FastAPI(
     description="Forensic capture and evidence management API",
     version="1.0.0"
 )
+
+# Include analysis router
+app.include_router(analysis_router)
 
 # Request/Response models
 class CaptureRequest(BaseModel):
