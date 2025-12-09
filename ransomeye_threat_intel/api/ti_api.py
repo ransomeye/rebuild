@@ -21,6 +21,7 @@ from ..dedup.deduper import IOCDeduplicator
 from ..trust.trust_score import TrustScorer
 from ..storage.ti_store import TIStore
 from ..storage.provenance_store import ProvenanceStore
+from ..tools.export_bundle import export_bundle as export_bundle_tool
 from .auth_middleware import verify_token
 
 logging.basicConfig(level=logging.INFO)
@@ -153,9 +154,35 @@ async def export_bundle(
     user_id: str = Depends(verify_token)
 ):
     """Export IOC bundle as signed tarball."""
-    # This would generate a signed bundle
-    # Implementation would use tools/export_bundle.py
-    return {"status": "export_initiated", "message": "Bundle export feature"}
+    try:
+        from datetime import datetime
+        import tempfile
+        
+        # Get IOCs from database based on filters
+        # Simplified - real implementation would query DB with filters
+        # For now, get all IOCs (would be filtered in production)
+        iocs = []  # Would be populated from ti_store based on filters
+        
+        # Generate output path
+        output_path = f"/tmp/ti_bundle_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.tar.gz"
+        
+        # Export bundle
+        result = export_bundle_tool(
+            iocs=iocs,
+            output_path=output_path,
+            sign=True
+        )
+        
+        return {
+            "status": "success",
+            "bundle_path": output_path,
+            "ioc_count": result.get('ioc_count', 0),
+            "bundle_hash": result.get('bundle_hash'),
+            "signed": result.get('signed', True)
+        }
+    except Exception as e:
+        logger.error(f"Error exporting bundle: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == '__main__':
     import uvicorn

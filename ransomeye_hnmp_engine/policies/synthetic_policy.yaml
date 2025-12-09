@@ -1,0 +1,68 @@
+# Path and File Name : /home/ransomeye/rebuild/ransomeye_hnmp_engine/policies/synthetic_policy.yaml
+# Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
+# Details of functionality of this file: Synthetic compliance policy for testing (not a real CIS/NIST benchmark)
+
+name: synthetic_security_policy
+description: Synthetic security compliance policy for testing (NOT a real CIS/NIST benchmark - generated for RansomEye Phase 19)
+
+rules:
+  - rule_id: rule_001
+    rule_name: Kernel Version Check
+    severity: high
+    check:
+      field: kernel_version
+      operator: neq
+      value: ''
+    remediation:
+      description: Ensure kernel version is specified
+      command: uname -r
+    weight: 5.0
+
+  - rule_id: rule_002
+    rule_name: Open Ports Limit
+    severity: medium
+    check:
+      field: open_ports
+      operator: lt
+      value: 20
+    remediation:
+      description: Review and close unnecessary open ports
+      command: netstat -tuln
+    weight: 2.0
+
+  - rule_id: rule_003
+    rule_name: SSH Service Running
+    severity: critical
+    check:
+      field: services
+      operator: contains
+      value: sshd
+    remediation:
+      description: Ensure SSH service is running
+      command: systemctl status sshd
+    weight: 10.0
+
+  - rule_id: rule_004
+    rule_name: IPv4 Forwarding Disabled
+    severity: high
+    check:
+      field: sysctl.net.ipv4.ip_forward
+      operator: eq
+      value: '0'
+    remediation:
+      description: Disable IPv4 forwarding if not needed
+      command: sysctl -w net.ipv4.ip_forward=0
+    weight: 5.0
+
+  - rule_id: rule_005
+    rule_name: Package Count Check
+    severity: low
+    check:
+      field: packages
+      operator: lt
+      value: 1000
+    remediation:
+      description: Review installed packages and remove unnecessary ones
+      command: dpkg -l | wc -l
+    weight: 1.0
+
