@@ -1,0 +1,39 @@
+{
+  "description": "Standalone RansomEye modules manifest (Phases 21-23)",
+  "version": "1.0.0",
+  "modules": [
+    {
+      "name": "ransomeye_linux_agent",
+      "phase": 21,
+      "description": "Linux Agent (Standalone)",
+      "required": true,
+      "must_have_install_script": true,
+      "install_script_path": "install.sh"
+    },
+    {
+      "name": "ransomeye_windows_agent",
+      "phase": 22,
+      "description": "Windows Agent (Standalone)",
+      "required": true,
+      "must_have_install_script": true,
+      "install_script_path": "installer/build_installer.ps1"
+    },
+    {
+      "name": "ransomeye_dpi_probe",
+      "phase": 23,
+      "description": "DPI Probe (Standalone)",
+      "required": true,
+      "must_have_install_script": true,
+      "install_script_path": "admin/install_probe.sh"
+    }
+  ],
+  "separation_requirements": {
+    "core_installer_must_not_reference": [
+      "linux_agent",
+      "windows_agent",
+      "dpi_probe"
+    ],
+    "standalone_modules_must_be_independent": true
+  }
+}
+

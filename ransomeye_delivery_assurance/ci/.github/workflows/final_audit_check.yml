@@ -1,0 +1,139 @@
+name: Final Delivery Assurance Audit
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - release/*
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      skip_signing:
+        description: 'Skip PDF signing'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  delivery-assurance:
+    runs-on: ubuntu-latest
+    name: Run Delivery Assurance Audit
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install reportlab cryptography
+      
+      - name: Run Structure Audit
+        id: structure
+        run: |
+          cd ${{ github.workspace }}
+          python3 ransomeye_delivery_assurance/tools/run_final_audit.py \
+            --category structure \
+            --root ${{ github.workspace }} \
+            --output ${{ github.workspace }}/logs/delivery_assurance
+        continue-on-error: false
+      
+      - name: Run Content Audit
+        id: content
+        run: |
+          cd ${{ github.workspace }}
+          python3 ransomeye_delivery_assurance/tools/run_final_audit.py \
+            --category content \
+            --root ${{ github.workspace }} \
+            --output ${{ github.workspace }}/logs/delivery_assurance
+        continue-on-error: false
+      
+      - name: Run Installer Audit
+        id: installer
+        run: |
+          cd ${{ github.workspace }}
+          python3 ransomeye_delivery_assurance/tools/run_final_audit.py \
+            --category installer \
+            --root ${{ github.workspace }} \
+            --output ${{ github.workspace }}/logs/delivery_assurance
+        continue-on-error: false
+      
+      - name: Run Security Scan
+        id: security
+        run: |
+          cd ${{ github.workspace }}
+          python3 ransomeye_delivery_assurance/tools/run_final_audit.py \
+            --category security \
+            --root ${{ github.workspace }} \
+            --output ${{ github.workspace }}/logs/delivery_assurance
+        continue-on-error: false
+      
+      - name: Generate Full Report
+        id: report
+        run: |
+          cd ${{ github.workspace }}
+          if [ "${{ inputs.skip_signing }}" == "true" ]; then
+            python3 ransomeye_delivery_assurance/tools/run_final_audit.py \
+              --root ${{ github.workspace }} \
+              --output ${{ github.workspace }}/logs/delivery_assurance \
+              --no-sign
+          else
+            python3 ransomeye_delivery_assurance/tools/run_final_audit.py \
+              --root ${{ github.workspace }} \
+              --output ${{ github.workspace }}/logs/delivery_assurance
+          fi
+        continue-on-error: false
+      
+      - name: Upload Audit Report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: delivery-assurance-report
+          path: |
+            logs/delivery_assurance/final_handover_report.pdf
+            logs/delivery_assurance/final_handover_report.pdf.sig
+            logs/delivery_assurance/audit_results.json
+          retention-days: 30
+      
+      - name: Display Audit Summary
+        if: always()
+        run: |
+          if [ -f logs/delivery_assurance/audit_results.json ]; then
+            echo "## Audit Summary" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Category | Status | Errors | Warnings | Passed |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|--------|--------|----------|--------|" >> $GITHUB_STEP_SUMMARY
+            python3 -c "
+            import json
+            with open('logs/delivery_assurance/audit_results.json') as f:
+                data = json.load(f)
+            for cat, results in data.get('categories', {}).items():
+                status = '✅ PASS' if results.get('error_count', 0) == 0 else '❌ FAIL'
+                errors = results.get('error_count', 0)
+                warnings = results.get('warning_count', 0)
+                passed = results.get('passed_count', 0)
+                print(f'| {cat} | {status} | {errors} | {warnings} | {passed} |')
+            "
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Overall Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Fail if audit failed
+        if: failure()
+        run: |
+          echo "❌ Delivery Assurance Audit Failed"
+          echo "Please review the audit results and fix all errors before merging."
+          exit 1
+

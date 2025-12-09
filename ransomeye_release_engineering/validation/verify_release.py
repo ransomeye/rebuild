@@ -94,9 +94,7 @@ class ReleaseVerifier:
                 # Only error if we have a public key (meaning signing was expected)
                 if public_key_path:
                     errors.append(f"Signature not found for {artifact_path.name}")
-                else:
-                    # Without public key, just warn (signing may be optional)
-                    print(f"  ⚠️  {artifact_path.name}: No signature (signing key not provided)")
+                # Otherwise silently skip (signing is optional)
                 continue
             
             # Try GPG verification

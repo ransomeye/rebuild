@@ -138,7 +138,7 @@ class CorePackager:
                 all_files.append((file_path, Path(root_file)))
             # Silently skip missing files (they may be created in other phases)
         
-        # Add root directories
+        # Add root directories (only include if they exist)
         print("\nIncluding root directories:")
         for root_dir in ROOT_DIRS:
             dir_path = self.project_root / root_dir
@@ -146,8 +146,7 @@ class CorePackager:
                 print(f"  + {root_dir}/")
                 dir_files = self._get_all_files(dir_path, self.project_root)
                 all_files.extend(dir_files)
-            else:
-                print(f"  ⚠️  {root_dir} not found (skipping)")
+            # Silently skip missing directories (they may be created in other phases)
         
         if not all_files:
             print("❌ ERROR: No files to package")

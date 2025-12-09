@@ -84,13 +84,15 @@ class SmokeTester:
                         else:
                             print(f"    ⚠️  {req_file} (optional, not found)")
                 
-                print("\n  Checking optional files:")
-                for opt_file, _ in optional_files:
-                    file_path = extract_path / opt_file
-                    if file_path.exists():
-                        print(f"    ✅ {opt_file}")
-                    else:
-                        print(f"    ⚠️  {opt_file} (optional, not found)")
+                # Only show optional files section if at least one exists
+                optional_found = any((extract_path / opt_file).exists() for opt_file, _ in optional_files)
+                if optional_found:
+                    print("\n  Checking optional files:")
+                    for opt_file, _ in optional_files:
+                        file_path = extract_path / opt_file
+                        if file_path.exists():
+                            print(f"    ✅ {opt_file}")
+                        # Silently skip missing optional files
                 
                 # Verify standalone agents are NOT included
                 excluded_agents = [

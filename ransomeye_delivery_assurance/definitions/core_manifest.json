@@ -1,0 +1,124 @@
+{
+  "description": "Core RansomEye modules manifest (Phases 1-20)",
+  "version": "1.0.0",
+  "modules": [
+    {
+      "name": "ransomeye_core",
+      "phase": 1,
+      "description": "Core Engine & Installer",
+      "required": true
+    },
+    {
+      "name": "ransomeye_install",
+      "phase": 1,
+      "description": "Installation scripts and tools",
+      "required": true
+    },
+    {
+      "name": "ransomeye_ai_core",
+      "phase": 2,
+      "description": "AI Core & Model Registry",
+      "required": true
+    },
+    {
+      "name": "ransomeye_alert_engine",
+      "phase": 3,
+      "description": "Alert Engine & Policy Manager",
+      "required": true
+    },
+    {
+      "name": "ransomeye_killchain",
+      "phase": 4,
+      "description": "KillChain Core",
+      "required": true
+    },
+    {
+      "name": "ransomeye_forensic",
+      "phase": 4,
+      "description": "Forensic Dump Engine",
+      "required": true
+    },
+    {
+      "name": "ransomeye_llm",
+      "phase": 5,
+      "description": "LLM Summarizer",
+      "required": true
+    },
+    {
+      "name": "ransomeye_response",
+      "phase": 6,
+      "description": "Incident Response & Playbooks",
+      "required": true
+    },
+    {
+      "name": "ransomeye_assistant",
+      "phase": 7,
+      "description": "SOC Copilot",
+      "required": true
+    },
+    {
+      "name": "ransomeye_correlation",
+      "phase": 8,
+      "description": "Threat Correlation Engine",
+      "required": true
+    },
+    {
+      "name": "ransomeye_net_scanner",
+      "phase": 9,
+      "description": "Network Scanner",
+      "required": true
+    },
+    {
+      "name": "ransomeye_db_core",
+      "phase": 10,
+      "description": "DB Core (PostgreSQL)",
+      "required": true
+    },
+    {
+      "name": "ransomeye_ui",
+      "phase": 11,
+      "description": "UI & Dashboards",
+      "required": true
+    },
+    {
+      "name": "ransomeye_orchestrator",
+      "phase": 12,
+      "description": "Orchestrator (Master Flow)",
+      "required": true
+    },
+    {
+      "name": "ransomeye_deception",
+      "phase": 16,
+      "description": "Deception Framework",
+      "required": true
+    },
+    {
+      "name": "ransomeye_threat_intel",
+      "phase": 18,
+      "description": "Threat Intelligence Feed Engine",
+      "required": true
+    },
+    {
+      "name": "ransomeye_hnmp_engine",
+      "phase": 19,
+      "description": "HNMP Engine",
+      "required": true
+    },
+    {
+      "name": "ransomeye_global_validator",
+      "phase": 20,
+      "description": "Global Validator",
+      "required": true
+    }
+  ],
+  "required_directories": [
+    "systemd",
+    "logs"
+  ],
+  "forbidden_in_core_installer": [
+    "linux_agent",
+    "windows_agent",
+    "dpi_probe"
+  ]
+}
+

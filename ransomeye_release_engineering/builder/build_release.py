@@ -147,8 +147,8 @@ def main():
             print(f"⚠️  Signing error: {e}")
             print("Continuing without signatures...")
     else:
-        print("⚠️  No signing key provided (RELEASE_SIGN_KEY_PATH not set)")
-        print("Artifacts will not be signed")
+        # Silent skip if no signing key (optional for development builds)
+        print("✅ Signing skipped (no key provided)")
     
     # Step 5: Generate manifests
     print("\n" + "=" * 70)
