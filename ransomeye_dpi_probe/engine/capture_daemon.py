@@ -239,7 +239,16 @@ class CaptureDaemon:
                 if buffer_size_mb > self.max_capture_mb:
                     logger.warning(f"Buffer size ({buffer_size_mb:.2f} MB) exceeds limit "
                                  f"({self.max_capture_mb} MB)")
-                    # TODO: Trigger upload or archive oldest files
+                    # Trigger upload if uploader is available
+                    try:
+                        from ransomeye_dpi_probe.storage.buffer_store import BufferStore
+                        buffer_store = BufferStore(str(self.buffer_dir))
+                        # Archive oldest files if buffer still exceeds limit after upload
+                        if buffer_store.get_total_size_mb() > self.max_capture_mb * 0.9:
+                            archived_removed = buffer_store.cleanup_old_archived()
+                            logger.info(f"Cleaned up {archived_removed} old archived files")
+                    except Exception as e:
+                        logger.error(f"Error managing buffer size: {e}")
                     
             except Exception as e:
                 logger.error(f"Error in cleanup worker: {e}")

@@ -1,0 +1,54 @@
+Phase,Component,Artifact_Path,Priority,Status
+Phase 1,Core Engine,/home/ransomeye/rebuild/ransomeye_core/,P0,COMPLETE
+Phase 1,Installer,/home/ransomeye/rebuild/ransomeye_install/,P0,COMPLETE
+Phase 2,AI Core,/home/ransomeye/rebuild/ransomeye_ai_core/,P0,COMPLETE
+Phase 2,Model Registry,/home/ransomeye/rebuild/ransomeye_ai_core/engine/model_registry.py,P0,COMPLETE
+Phase 2,SHAP Engine,/home/ransomeye/rebuild/ransomeye_ai_core/explainability/shap_utils.py,P0,COMPLETE
+Phase 3,Alert Engine,/home/ransomeye/rebuild/ransomeye_alert_engine/,P0,COMPLETE
+Phase 3,Policy Manager,/home/ransomeye/rebuild/ransomeye_alert_engine/engine/policy_loader.py,P0,COMPLETE
+Phase 4,KillChain Core,/home/ransomeye/rebuild/ransomeye_killchain/,P0,COMPLETE
+Phase 4,Forensic Dump,/home/ransomeye/rebuild/ransomeye_forensic/,P0,COMPLETE
+Phase 4,Timeline Builder,/home/ransomeye/rebuild/ransomeye_killchain/timeline/timeline_builder.py,P0,COMPLETE
+Phase 5,LLM Summarizer,/home/ransomeye/rebuild/ransomeye_llm/,P0,COMPLETE
+Phase 5,PDF Exporter,/home/ransomeye/rebuild/ransomeye_llm/export/pdf_exporter.py,P0,COMPLETE
+Phase 6,Incident Response,/home/ransomeye/rebuild/ransomeye_response/,P0,COMPLETE
+Phase 6,Playbook Registry,/home/ransomeye/rebuild/ransomeye_response/engine/playbook_registry.py,P0,COMPLETE
+Phase 7,SOC Copilot,/home/ransomeye/rebuild/ransomeye_assistant/,P0,COMPLETE
+Phase 7,RAG Engine,/home/ransomeye/rebuild/ransomeye_assistant/engine/retriever_tfidf.py,P0,COMPLETE
+Phase 8,Threat Correlation,/home/ransomeye/rebuild/ransomeye_correlation/,P1,COMPLETE
+Phase 8,Graph Builder,/home/ransomeye/rebuild/ransomeye_correlation/engine/graph_builder.py,P1,COMPLETE
+Phase 9,Network Scanner,/home/ransomeye/rebuild/ransomeye_net_scanner/,P0,COMPLETE
+Phase 9,CVE Checker,/home/ransomeye/rebuild/ransomeye_net_scanner/engine/cve_checker.py,P0,COMPLETE
+Phase 10,DB Core,/home/ransomeye/rebuild/ransomeye_db_core/,P0,COMPLETE
+Phase 10,Retention Enforcer,/home/ransomeye/rebuild/ransomeye_db_core/engine/retention_enforcer.py,P0,COMPLETE
+Phase 11,UI & Dashboards,/home/ransomeye/rebuild/ransomeye_ui/,P0,COMPLETE
+Phase 11,React Frontend,/home/ransomeye/rebuild/ransomeye_ui/react_frontend/,P0,COMPLETE
+Phase 12,Orchestrator,/home/ransomeye/rebuild/ransomeye_orchestrator/,P1,COMPLETE
+Phase 12,Bundler Engine,/home/ransomeye/rebuild/ransomeye_orchestrator/bundle/bundle_builder.py,P1,COMPLETE
+Phase 13,Forensic Advanced,/home/ransomeye/rebuild/ransomeye_forensic/,P1,COMPLETE
+Phase 13,Memory Diffing,/home/ransomeye/rebuild/ransomeye_forensic/diff/diff_memory.py,P1,COMPLETE
+Phase 13,Malware DNA,/home/ransomeye/rebuild/ransomeye_forensic/dna/malware_dna.py,P1,COMPLETE
+Phase 14,LLM Behavior,/home/ransomeye/rebuild/ransomeye_llm_behavior/,P0,COMPLETE
+Phase 14,Context Injector,/home/ransomeye/rebuild/ransomeye_llm_behavior/engine/context_injector.py,P0,COMPLETE
+Phase 15,SOC Copilot Advanced,/home/ransomeye/rebuild/ransomeye_assistant_advanced/,P0,COMPLETE
+Phase 15,Multi-Modal,/home/ransomeye/rebuild/ransomeye_assistant_advanced/engine/multi_modal.py,P0,COMPLETE
+Phase 16,Deception Framework,/home/ransomeye/rebuild/ransomeye_deception/,P1,COMPLETE
+Phase 16,Decoy Dispatcher,/home/ransomeye/rebuild/ransomeye_deception/engine/dispatcher.py,P1,COMPLETE
+Phase 17,AI Assistant Governor,/home/ransomeye/rebuild/ransomeye_ai_advanced/,P1,COMPLETE
+Phase 17,Load Governor,/home/ransomeye/rebuild/ransomeye_ai_advanced/engine/llm_governor.py,P1,COMPLETE
+Phase 18,Threat Intel Engine,/home/ransomeye/rebuild/ransomeye_threat_intel/,P0,COMPLETE
+Phase 18,Feed Enricher,/home/ransomeye/rebuild/ransomeye_threat_intel/engine/feed_enricher.py,P0,COMPLETE
+Phase 19,HNMP Engine,/home/ransomeye/rebuild/ransomeye_hnmp_engine/,P0,COMPLETE
+Phase 19,Compliance Scanner,/home/ransomeye/rebuild/ransomeye_hnmp_engine/engine/compliance_scanner.py,P0,COMPLETE
+Phase 20,Global Validator,/home/ransomeye/rebuild/ransomeye_global_validator/,P0,COMPLETE
+Phase 20,Synthetic Runner,/home/ransomeye/rebuild/ransomeye_global_validator/engine/synthetic_runner.py,P0,COMPLETE
+Phase 21,Linux Agent,/home/ransomeye/rebuild/ransomeye_linux_agent/,P0,COMPLETE
+Phase 21,Agent Client,/home/ransomeye/rebuild/ransomeye_linux_agent/transport/agent_client.py,P0,COMPLETE
+Phase 21,Update Script,/home/ransomeye/rebuild/ransomeye_linux_agent/updater/apply_update.sh,P0,COMPLETE
+Phase 22,Windows Agent,/home/ransomeye/rebuild/ransomeye_windows_agent/,P0,COMPLETE
+Phase 22,Agent Client,/home/ransomeye/rebuild/ransomeye_windows_agent/transport/agent_client.py,P0,COMPLETE
+Phase 22,Update Script,/home/ransomeye/rebuild/ransomeye_windows_agent/updater/apply_update.ps1,P0,COMPLETE
+Phase 23,DPI Probe,/home/ransomeye/rebuild/ransomeye_dpi_probe/,P0,COMPLETE
+Phase 23,Capture Daemon,/home/ransomeye/rebuild/ransomeye_dpi_probe/engine/capture_daemon.py,P0,COMPLETE
+Phase 24,Project Governance,/home/ransomeye/rebuild/ransomeye_governance/,P0,IN_PROGRESS
+

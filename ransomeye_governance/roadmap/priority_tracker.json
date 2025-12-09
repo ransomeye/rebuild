@@ -1,0 +1,138 @@
+{
+  "metadata": {
+    "last_updated": "2024-12-19",
+    "version": "1.0.0",
+    "project_root": "/home/ransomeye/rebuild/"
+  },
+  "p0_critical": {
+    "phase_1_core_engine": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_core/",
+      "gates": ["installer_verified", "systemd_enabled", "core_api_running"]
+    },
+    "phase_2_ai_core": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_ai_core/",
+      "gates": ["model_registry_verified", "shap_enabled", "metadata_valid"]
+    },
+    "phase_3_alert_engine": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_alert_engine/",
+      "gates": ["policy_hot_reload", "deduplication_working", "routing_validated"]
+    },
+    "phase_4_killchain_forensic": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_killchain/",
+      "gates": ["timeline_generated", "compression_verified", "ledger_checksum_match"]
+    },
+    "phase_5_llm_summarizer": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_llm/",
+      "gates": ["pdf_export", "html_export", "csv_export", "shap_context", "version_hash"]
+    },
+    "phase_6_incident_response": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_response/",
+      "gates": ["signed_playbooks", "rollback_tested", "checksum_validation"]
+    },
+    "phase_7_soc_copilot": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_assistant/",
+      "gates": ["shap_answers", "feedback_export", "offline_rag"]
+    },
+    "phase_9_network_scanner": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_net_scanner/",
+      "gates": ["subnet_detection", "cve_matching", "accuracy_validated"]
+    },
+    "phase_10_db_core": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_db_core/",
+      "gates": ["partitioning_by_year", "retention_enforced", "pii_encrypted"]
+    },
+    "phase_11_ui_dashboards": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_ui/",
+      "gates": ["offline_loading", "exports_working", "caching_validated"]
+    },
+    "phase_14_llm_behavior": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_llm_behavior/",
+      "gates": ["context_injected", "regression_stable"]
+    },
+    "phase_15_soc_copilot_advanced": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_assistant_advanced/",
+      "gates": ["multi_modal_input", "playbook_linking", "embeddings_validated"]
+    },
+    "phase_18_threat_intel": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_threat_intel/",
+      "gates": ["ioc_dedup", "trust_scores", "shap_breakdown"]
+    },
+    "phase_19_hnmp_engine": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_hnmp_engine/",
+      "gates": ["compliance_scanned", "fleet_health", "dashboards_exported"]
+    },
+    "phase_20_global_validator": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_global_validator/",
+      "gates": ["synthetic_chain", "signed_pdf", "all_phases_pass"]
+    },
+    "phase_21_linux_agent": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_linux_agent/",
+      "gates": ["mtls_verified", "shap_outputs", "buffer_persistence", "signed_updates"]
+    },
+    "phase_22_windows_agent": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_windows_agent/",
+      "gates": ["mtls_verified", "etw_telemetry", "signed_msi", "driver_safe"]
+    },
+    "phase_23_dpi_probe": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_dpi_probe/",
+      "gates": ["capture_10gbps", "ml_classification", "shap_valid", "buffer_resume"]
+    },
+    "phase_24_governance": {
+      "status": "in_progress",
+      "path": "/home/ransomeye/rebuild/ransomeye_governance/",
+      "gates": ["gates_pass", "no_hardcoded_ports", "security_controls_verified"]
+    }
+  },
+  "p1_high": {
+    "phase_8_threat_correlation": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_correlation/",
+      "gates": ["neo4j_export", "confidence_shap"]
+    },
+    "phase_12_orchestrator": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_orchestrator/",
+      "gates": ["chain_bundles", "incident_rehydration"]
+    },
+    "phase_13_forensic_advanced": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_forensic/",
+      "gates": ["binary_deltas", "yara_dna", "db_storage"]
+    },
+    "phase_16_deception": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_deception/",
+      "gates": ["decoy_rotation", "logs_exported"]
+    },
+    "phase_17_ai_governor": {
+      "status": "complete",
+      "path": "/home/ransomeye/rebuild/ransomeye_ai_advanced/",
+      "gates": ["governor_throttles", "multi_agent_consistent", "latency_threshold"]
+    }
+  },
+  "p2_normal": {
+    "future_enhancements": {
+      "status": "planned",
+      "notes": "Reserved for post-release features"
+    }
+  }
+}
+

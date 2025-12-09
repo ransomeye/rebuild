@@ -1,0 +1,205 @@
+# Path and File Name : /home/ransomeye/rebuild/ransomeye_governance/gates/verification_policies.yaml
+# Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
+# Details of functionality of this file: Configuration file listing required file signatures and paths per module for gate verification
+
+---
+# RansomEye Verification Policies
+# This file defines required files, patterns, and signatures for each module
+
+project_root: "/home/ransomeye/rebuild"
+
+# mTLS Verification Policies
+mtls_requirements:
+  linux_agent:
+    transport_file: "ransomeye_linux_agent/transport/agent_client.py"
+    required_patterns:
+      - "AGENT_CERT_PATH"
+      - "AGENT_KEY_PATH"
+      - "cert.*=.*\\(.*cert_path.*key_path"
+      - "verify.*=.*True"
+    min_patterns: 2
+  
+  windows_agent:
+    transport_file: "ransomeye_windows_agent/transport/agent_client.py"
+    required_patterns:
+      - "AGENT_CERT_PATH"
+      - "AGENT_KEY_PATH"
+      - "cert.*=.*\\(.*cert_path.*key_path"
+      - "verify.*=.*True"
+    min_patterns: 2
+  
+  dpi_probe:
+    transport_file: "ransomeye_dpi_probe/transport/probe_client.py"
+    required_patterns:
+      - "PROBE_CERT_PATH"
+      - "cert.*=.*\\(.*cert_path.*key_path"
+      - "verify.*=.*True"
+    min_patterns: 2
+
+# SHAP Explainability Requirements
+shap_requirements:
+  ai_core:
+    module_path: "ransomeye_ai_core"
+    file_pattern: "**/shap*.py"
+    required: true
+  
+  forensic:
+    module_path: "ransomeye_forensic"
+    file_pattern: "**/shap*.py"
+    required: true
+  
+  hnmp_engine:
+    module_path: "ransomeye_hnmp_engine"
+    file_pattern: "**/shap*.py"
+    required: true
+  
+  dpi_probe:
+    module_path: "ransomeye_dpi_probe"
+    file_pattern: "**/shap*.py"
+    required: true
+  
+  linux_agent:
+    module_path: "ransomeye_linux_agent"
+    file_pattern: "**/shap*.py"
+    required: true
+  
+  windows_agent:
+    module_path: "ransomeye_windows_agent"
+    file_pattern: "**/shap*.py"
+    required: true
+
+# Buffer/Persistence Requirements
+buffer_requirements:
+  linux_agent:
+    persistence_file: "ransomeye_linux_agent/engine/persistence.py"
+    required_patterns:
+      - "BUFFER_DIR"
+      - "buffer"
+      - "persist|Persistence"
+    min_patterns: 2
+  
+  windows_agent:
+    persistence_file: "ransomeye_windows_agent/engine/persistence.py"
+    required_patterns:
+      - "BUFFER_DIR"
+      - "buffer"
+      - "persist|Persistence"
+    min_patterns: 2
+  
+  dpi_probe:
+    module_path: "ransomeye_dpi_probe"
+    file_pattern: "**/persistence.py"
+    required: false
+
+# Signed Update Requirements
+signing_requirements:
+  linux_agent:
+    update_script: "ransomeye_linux_agent/updater/apply_update.sh"
+    required: true
+    signature_patterns:
+      - "signature|verify|gpg|openssl.*verify"
+    min_file_size: 100
+  
+  windows_agent:
+    update_script: "ransomeye_windows_agent/updater/apply_update.ps1"
+    required: true
+    signature_patterns:
+      - "Signature|Verify|Get-AuthenticodeSignature"
+    min_file_size: 100
+
+# File Header Requirements
+header_requirements:
+  required_header_pattern: "^# Path and File Name"
+  author_pattern: "nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU"
+  file_extensions:
+    - ".py"
+    - ".sh"
+    - ".yaml"
+    - ".yml"
+    - ".service"
+    - ".ts"
+    - ".tsx"
+  exclude_patterns:
+    - "**/node_modules/**"
+    - "**/__pycache__/**"
+    - "**/.git/**"
+    - "**/venv/**"
+    - "**/dist/**"
+    - "**/build/**"
+
+# Export Requirements
+export_requirements:
+  required_formats:
+    - "PDF"
+    - "HTML"
+    - "CSV"
+  footer_text: "© RansomEye.Tech | Support: Gagan@RansomEye.Tech"
+  required_fields:
+    - "timestamp"
+    - "build_hash"
+    - "model_version_hash"
+
+# Systemd Requirements
+systemd_requirements:
+  systemd_dir: "systemd"
+  required_fields:
+    - "Restart=always"
+    - "WantedBy=multi-user.target"
+    - "StandardOutput=journal"
+    - "StandardError=journal"
+  master_core_modules:
+    - "ransomeye_ai_core"
+    - "ransomeye_alert_engine"
+    - "ransomeye_db_core"
+    - "ransomeye_llm"
+    - "ransomeye_response"
+    - "ransomeye_master_core"
+    - "ransomeye_threat_intel"
+    - "ransomeye_hnmp_engine"
+
+# Environment Variable Requirements
+env_requirements:
+  mandatory_variables:
+    - "DB_HOST"
+    - "DB_PORT"
+    - "DB_NAME"
+    - "DB_USER"
+    - "DB_PASS"
+    - "MODEL_DIR"
+    - "PDF_ENGINE_PATH"
+    - "OUTPUT_DIR"
+    - "CORE_API_PORT"
+  agent_variables:
+    - "CORE_API_URL"
+    - "AGENT_CERT_PATH"
+    - "BUFFER_DIR"
+  probe_variables:
+    - "CORE_API_URL"
+    - "PROBE_CERT_PATH"
+    - "CAPTURE_IFACE"
+    - "BUFFER_DIR"
+
+# Port Restrictions
+port_restrictions:
+  restricted_ports:
+    - 8080
+    - 5432
+    - 3000
+    - 3306
+    - 6379
+  whitelisted_files:
+    - "**/.env"
+    - "**/.env.example"
+    - "**/config.yaml"
+    - "**/config.yml"
+    - "**/verification_policies.yaml"
+    - "**/requirements.txt"
+    - "**/README.md"
+    - "**/*.md"
+  allowed_contexts:
+    - "os.environ.get"
+    - "os.getenv"
+    - "config.get"
+    - "default.*port"
+    - "PORT.*="
+
