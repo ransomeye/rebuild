@@ -1,0 +1,21 @@
+{
+  "keywords": [
+    "password",
+    "secret",
+    "api_key",
+    "token",
+    "credential",
+    "ssn",
+    "social security",
+    "credit card",
+    "bank account",
+    "private key"
+  ],
+  "patterns": [
+    "\\b\\d{3}-\\d{2}-\\d{4}\\b",
+    "\\b\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}\\b",
+    "[A-Za-z0-9+/]{40,}={0,2}"
+  ],
+  "version": "1.0"
+}
+
