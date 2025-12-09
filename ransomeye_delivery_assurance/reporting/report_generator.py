@@ -25,38 +25,60 @@ class ReportGenerator:
         
     def _setup_custom_styles(self):
         """Setup custom paragraph styles."""
-        self.styles.add(ParagraphStyle(
-            name='Title',
-            parent=self.styles['Heading1'],
+        # Helper function to add or update a style
+        def add_or_update_style(style_name, parent_name, **kwargs):
+            """Add style if it doesn't exist, or update it if it does."""
+            if style_name in self.styles.byName:
+                # Style exists, update its attributes
+                existing_style = self.styles[style_name]
+                for key, value in kwargs.items():
+                    setattr(existing_style, key, value)
+            else:
+                # Style doesn't exist, add it
+                parent = self.styles[parent_name] if parent_name else None
+                new_style = ParagraphStyle(
+                    name=style_name,
+                    parent=parent,
+                    **kwargs
+                )
+                self.styles.add(new_style)
+        
+        # Title style (may already exist in sample stylesheet)
+        add_or_update_style(
+            'Title',
+            'Heading1',
             fontSize=24,
             textColor=colors.HexColor('#1a1a1a'),
             spaceAfter=30,
             alignment=TA_CENTER
-        ))
+        )
         
-        self.styles.add(ParagraphStyle(
-            name='Heading2',
-            parent=self.styles['Heading2'],
+        # Heading2 style (may already exist in sample stylesheet)
+        add_or_update_style(
+            'Heading2',
+            'Heading2',
             fontSize=16,
             textColor=colors.HexColor('#2c3e50'),
             spaceAfter=12,
             spaceBefore=12
-        ))
+        )
         
-        self.styles.add(ParagraphStyle(
-            name='Body',
-            parent=self.styles['BodyText'],
+        # Body style (custom, likely doesn't exist)
+        add_or_update_style(
+            'Body',
+            'BodyText',
             fontSize=10,
             spaceAfter=6
-        ))
+        )
         
-        self.styles.add(ParagraphStyle(
-            name='Footer',
-            parent=self.styles['Normal'],
+        # Footer style (custom, likely doesn't exist)
+        add_or_update_style(
+            'Footer',
+            'Normal',
             fontSize=8,
             textColor=colors.grey,
             alignment=TA_CENTER
-        ))
+        )
     
     def generate_report(self, audit_results: Dict) -> str:
         """Generate PDF report from audit results."""

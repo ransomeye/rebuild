@@ -1,6 +1,6 @@
 # Path and File Name : /home/ransomeye/rebuild/ransomeye_orchestrator/bundle/verifier.py
 # Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
-# Details of functionality: Verifies manifest signature and file hashes (fail-closed)
+# Details of functionality of this file: Verifies manifest signature and file hashes (fail-closed)
 
 import os
 import json

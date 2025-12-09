@@ -1,6 +1,6 @@
 # Path and File Name : /home/ransomeye/rebuild/ransomeye_release_engineering/validation/final_smoke_test.py
 # Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
-# Details of functionality: Unpacks Core artifact in temp directory to verify folder structure and key components
+# Details of functionality of this file: Unpacks Core artifact in temp directory to verify folder structure and key components
 
 import tarfile
 import tempfile

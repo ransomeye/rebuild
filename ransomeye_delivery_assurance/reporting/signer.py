@@ -1,6 +1,6 @@
 # Path and File Name : /home/ransomeye/rebuild/ransomeye_delivery_assurance/reporting/signer.py
 # Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
-# Details of functionality: Signs the handover report PDF using RSA-PSS signature with key from AUDIT_SIGN_KEY_PATH
+# Details of functionality of this file: Signs the handover report PDF using RSA-PSS signature with key from AUDIT_SIGN_KEY_PATH
 
 import os
 import hashlib
