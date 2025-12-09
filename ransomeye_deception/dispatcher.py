@@ -35,10 +35,12 @@ class Dispatcher:
     def __init__(self):
         """Initialize dispatcher."""
         self.placement_engine = PlacementEngine()
-        self.rotator = Rotator()
         self.config_store = ConfigStore()
         self.monitor = DecoyMonitor()
         self.alert_engine = AlertEngine()
+        
+        # Create rotator with connection callback
+        self.rotator = Rotator(connection_callback=self._on_service_connection)
         
         # Register alert callback
         self.monitor.register_callback(self._on_decoy_interaction)
@@ -223,4 +225,16 @@ class Dispatcher:
         """
         # Send alert
         await self.alert_engine.send_decoy_alert(decoy_id, event_type, event_data)
+    
+    async def _on_service_connection(self, decoy_id: str, client_ip: str, port: int):
+        """
+        Handle service connection event.
+        
+        Args:
+            decoy_id: Decoy ID
+            client_ip: Client IP address
+            port: Port number
+        """
+        # Record connection in monitor
+        await self.monitor.record_connection(decoy_id, client_ip, port)
 

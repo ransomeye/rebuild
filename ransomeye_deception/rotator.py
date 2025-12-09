@@ -31,14 +31,20 @@ class Rotator:
     Implements: Setup New -> Verify -> Tear Down Old
     """
     
-    def __init__(self):
-        """Initialize rotator."""
+    def __init__(self, connection_callback=None):
+        """
+        Initialize rotator.
+        
+        Args:
+            connection_callback: Optional callback for service connection events
+        """
         self.config_store = ConfigStore()
+        self.connection_callback = connection_callback
         
         # Initialize deployers
         self.deployers = {
             'file': FileDecoy(),
-            'service': ServiceDecoy(),
+            'service': ServiceDecoy(connection_callback=connection_callback),
             'process': ProcessDecoy(),
             'host': HostDecoy()
         }

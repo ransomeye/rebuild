@@ -26,9 +26,15 @@ class ServiceDecoy:
     Creates low-interaction network listeners with fake banners.
     """
     
-    def __init__(self):
-        """Initialize service decoy deployer."""
+    def __init__(self, connection_callback=None):
+        """
+        Initialize service decoy deployer.
+        
+        Args:
+            connection_callback: Optional callback for connection events
+        """
         self.active_servers = {}  # decoy_id -> {server, task, port, host}
+        self.connection_callback = connection_callback
         self.banners = {
             22: "SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5\r\n",
             80: "HTTP/1.1 200 OK\r\nServer: Apache/2.4.41\r\n",
@@ -97,10 +103,20 @@ class ServiceDecoy:
                 pass
     
     async def _on_connection(self, decoy_id: str, client_ip: str, port: int):
-        """Callback for connection events."""
-        # This will be handled by monitor/decoy_monitor.py
-        # In production, this would trigger the monitor's record_connection method
-        pass
+        """
+        Callback for connection events.
+        
+        Args:
+            decoy_id: Decoy ID
+            client_ip: Client IP address
+            port: Port number
+        """
+        # Call registered callback if available
+        if self.connection_callback:
+            try:
+                await self.connection_callback(decoy_id, client_ip, port)
+            except Exception as e:
+                logger.error(f"Error in connection callback: {e}")
     
     async def _run_server(self, decoy_id: str, host: str, port: int):
         """
