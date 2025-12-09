@@ -15,6 +15,7 @@ from .injector import Injector
 from .verifier import Verifier
 from .pdf_signer import PDFSigner
 from ..ml.validator_model import ValidatorModel
+from ..ml.shap_support import SHAPSupport
 from ..chain.manifest_builder import ManifestBuilder
 from ..chain.manifest_signer import ManifestSigner
 from ..storage.run_store import RunStore
@@ -34,6 +35,7 @@ class SyntheticRunner:
         self.verifier = Verifier()
         self.pdf_signer = PDFSigner()
         self.validator_model = ValidatorModel()
+        self.shap_support = SHAPSupport(self.validator_model)
         self.manifest_builder = ManifestBuilder()
         self.manifest_signer = ManifestSigner()
         self.run_store = RunStore()
@@ -81,6 +83,10 @@ class SyntheticRunner:
             
             # Run ML validator
             ml_result = self.validator_model.predict_health(metrics)
+            
+            # Generate SHAP explanation
+            shap_result = self.shap_support.generate_explanation(metrics, run_id)
+            ml_result["shap_explanation"] = shap_result
             
             # Build run data
             run_data = {
@@ -176,7 +182,7 @@ class SyntheticRunner:
                 }
             
             elif step.step_id == "step_2":
-                # Poll for incident creation
+                # Poll KillChain for incident creation
                 alert_id = scenario.synthetic_data.get("alert_id")
                 if not alert_id:
                     return {
@@ -187,21 +193,39 @@ class SyntheticRunner:
                         "error": "Alert ID not available from step 1"
                     }
                 
-                # Wait a bit for KillChain to process
-                await asyncio.sleep(2)
+                # Generate incident_id and trigger KillChain timeline build
+                incident_id = scenario.synthetic_data.get("expected_incident_id")
+                if not incident_id:
+                    incident_id = str(uuid.uuid4())
+                    scenario.synthetic_data["expected_incident_id"] = incident_id
                 
-                # For now, we'll check if alert exists and assume incident will be created
-                # In a real implementation, we'd poll the KillChain API or DB
-                alert_result = await self.verifier.verify_alert_in_db(alert_id, max_wait_seconds=step.timeout_seconds)
+                # Trigger KillChain to build timeline (this creates the incident)
+                alert_data = scenario.synthetic_data.get("alert")
+                try:
+                    timeline_result = await self.injector.build_timeline(incident_id, [alert_data])
+                    if timeline_result.get("success"):
+                        # Update incident_id from response if available
+                        response_incident_id = timeline_result.get("response", {}).get("incident_id")
+                        if response_incident_id:
+                            incident_id = response_incident_id
+                            scenario.synthetic_data["expected_incident_id"] = incident_id
+                except Exception as e:
+                    logger.warning(f"KillChain timeline build failed, will poll anyway: {e}")
+                
+                # Poll KillChain DB for incident creation with exponential backoff
+                incident_result = await self.verifier.verify_incident_created(
+                    incident_id, 
+                    max_wait_seconds=step.timeout_seconds
+                )
                 
                 return {
                     "step_id": step.step_id,
                     "name": step.name,
-                    "status": "PASSED" if alert_result.get("success") else "FAILED",
-                    "success": alert_result.get("success", False),
-                    "latency_ms": alert_result.get("wait_time_seconds", 0) * 1000,
-                    "details": alert_result,
-                    "error": alert_result.get("error")
+                    "status": "PASSED" if incident_result.get("success") else "FAILED",
+                    "success": incident_result.get("success", False),
+                    "latency_ms": incident_result.get("wait_time_seconds", 0) * 1000,
+                    "details": incident_result,
+                    "error": incident_result.get("error")
                 }
             
             elif step.step_id == "step_3":
