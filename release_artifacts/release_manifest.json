@@ -1,0 +1,22 @@
+{
+    "version": "1.0.0-rc1",
+    "build_date": "2025-12-10T13:17:35.675863+00:00",
+    "artifacts": [
+        {
+            "filename": "ransomeye-core.tar.gz",
+            "sha256": "69d447075644b1e4efba34bbfc0cdefec5deea94880a2b2483e3d9c0f30f9ef0"
+        },
+        {
+            "filename": "ransomeye-linux_agent.tar.gz",
+            "sha256": "741d811bf064ce4f7f26988af221d997d2f1e9099ce420cc12a7645a7ac1ee8e"
+        },
+        {
+            "filename": "ransomeye-windows_agent.zip",
+            "sha256": "85622763a1bbcbcd369e3e35aafaf053e7e43bfe0778996db3faffd7c0fd186d"
+        },
+        {
+            "filename": "ransomeye-dpi_probe.tar.gz",
+            "sha256": "5157b66058dff9ab07d17d27b6e9300ef353eed1ce60db8fa146cbab57030f2a"
+        }
+    ]
+}

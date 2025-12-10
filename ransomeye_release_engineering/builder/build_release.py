@@ -1,187 +1,158 @@
 # Path and File Name : /home/ransomeye/rebuild/ransomeye_release_engineering/builder/build_release.py
 # Author: nXxBku0CKFAJCBN3X1g3bQk7OxYQylg8CMw1iGsq7gU
-# Details of functionality of this file: Main release orchestrator that enforces gates and packages Core and Agents into separate signed artifacts
+# Details of functionality of this file: Robust Release Builder with Real Signing
 
 import os
 import sys
+import tarfile
+import zipfile
+import hashlib
+import json
 import subprocess
-from pathlib import Path
-from typing import Optional
-import argparse
+import shutil
+# CRITICAL: Import both datetime class and timezone class
+from datetime import datetime, timezone
 
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
+ROOT_DIR = "/home/ransomeye/rebuild"
+ARTIFACTS_DIR = os.path.join(ROOT_DIR, "release_artifacts")
+SIGNING_KEY = os.path.join(ROOT_DIR, "keys/release_private.pem")
 
-from builder.packager_core import CorePackager
-from builder.packager_agents import AgentPackager
-from builder.artifact_signer import ArtifactSigner
-from manifests.generate_release_manifest import ManifestGenerator
-
-# Project root
-PROJECT_ROOT = Path("/home/ransomeye/rebuild")
-GATES_SCRIPT = PROJECT_ROOT / "ransomeye_governance" / "gates" / "check_gates.py"
-ARTIFACTS_DIR = PROJECT_ROOT / "ransomeye_release_engineering" / "artifacts"
-
-
-def get_version() -> str:
-    """Read version from VERSION file or environment variable."""
-    version_file = PROJECT_ROOT / "VERSION"
-    if version_file.exists():
-        return version_file.read_text().strip()
-    
-    version = os.environ.get("RELEASE_VERSION", "1.0.0")
-    return version
-
-
-def check_gates() -> bool:
-    """Run gate checks and abort if they fail."""
-    print("=" * 70)
-    print("PHASE 25: RELEASE PACKAGING - GATE ENFORCEMENT")
-    print("=" * 70)
-    print(f"\n[STEP 1] Running acceptance gates: {GATES_SCRIPT}")
-    
-    if not GATES_SCRIPT.exists():
-        print(f"❌ ERROR: Gate checker not found: {GATES_SCRIPT}")
-        return False
+def run_governance_gate():
+    print("======================================================================")
+    print("STEP 1: Running Governance Gate Checks")
+    print("======================================================================")
+    gate_script = os.path.join(ROOT_DIR, "ransomeye_governance/gates/check_gates.py")
     
     try:
-        result = subprocess.run(
-            [sys.executable, str(GATES_SCRIPT)],
-            cwd=str(PROJECT_ROOT),
-            capture_output=False,
-            text=True
-        )
-        
-        if result.returncode != 0:
-            print(f"\n❌ GATE CHECK FAILED (exit code: {result.returncode})")
-            print("Release packaging aborted. Fix gate failures before proceeding.")
+        subprocess.run([sys.executable, gate_script], check=True)
+        print("\n✅ Governance Gate: PASSED\n")
+    except subprocess.CalledProcessError:
+        print("\n❌ Governance Gate: FAILED. Aborting Release.")
+        sys.exit(1)
+
+def calculate_sha256(file_path):
+    sha256_hash = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        for byte_block in iter(lambda: f.read(4096), b""):
+            sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()
+
+def sign_artifact(file_path):
+    sig_path = file_path + ".sig"
+    
+    if os.path.exists(SIGNING_KEY):
+        try:
+            cmd = [
+                "openssl", "dgst", "-sha256", "-sign", SIGNING_KEY,
+                "-out", sig_path, file_path
+            ]
+            subprocess.run(cmd, check=True)
+            print(f"  🔒 Signed: {os.path.basename(sig_path)}")
+            return True
+        except Exception as e:
+            print(f"  ⚠️ Signing Failed: {e}")
             return False
-        
-        print("\n✅ ALL GATES PASSED - Proceeding with packaging")
-        return True
-        
-    except Exception as e:
-        print(f"❌ ERROR: Failed to run gate checker: {e}")
+    else:
+        print(f"  ⚠️ Private Key not found at {SIGNING_KEY}. Skipping signature.")
         return False
 
+def exclude_filter(tarinfo):
+    name = tarinfo.name
+    if "__pycache__" in name or ".venv" in name or ".git" in name or ".DS_Store" in name:
+        return None
+    return tarinfo
+
+def build_artifact(name, contents, type="tar"):
+    print(f"📦 Building {name} artifact...")
+    output_filename = f"ransomeye-{name}.{type}" if type == "zip" else f"ransomeye-{name}.tar.gz"
+    output_path = os.path.join(ARTIFACTS_DIR, output_filename)
+    
+    try:
+        if type == "zip":
+            with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+                for item in contents:
+                    src_path = os.path.join(ROOT_DIR, item)
+                    if os.path.isdir(src_path):
+                        for root, _, files in os.walk(src_path):
+                            for file in files:
+                                if "__pycache__" in root or ".venv" in root:
+                                    continue
+                                file_path = os.path.join(root, file)
+                                if os.path.exists(file_path):
+                                    arcname = os.path.relpath(file_path, ROOT_DIR)
+                                    zipf.write(file_path, arcname)
+                    elif os.path.exists(src_path):
+                        zipf.write(src_path, item)
+        else:
+            with tarfile.open(output_path, "w:gz") as tar:
+                for item in contents:
+                    src_path = os.path.join(ROOT_DIR, item)
+                    if os.path.exists(src_path):
+                        tar.add(src_path, arcname=item, filter=exclude_filter)
+                    else:
+                        print(f"  ⚠️ Warning: {item} not found, skipping.")
+
+        file_hash = calculate_sha256(output_path)
+        size_mb = os.path.getsize(output_path) / 1024 / 1024
+        print(f"  ✅ Created: {output_filename} ({size_mb:.2f} MB)")
+        print(f"  ✅ SHA256: {file_hash}")
+        
+        sign_artifact(output_path)
+        
+        return {"filename": output_filename, "sha256": file_hash}
+
+    except Exception as e:
+        print(f"  ❌ Build Failed: {e}")
+        if os.path.exists(output_path):
+            os.remove(output_path)
+        sys.exit(1)
 
 def main():
-    """Main release build orchestrator."""
-    parser = argparse.ArgumentParser(description="Build RansomEye release artifacts")
-    parser.add_argument(
-        "--skip-gates",
-        action="store_true",
-        help="Skip gate checks (NOT RECOMMENDED for production)"
-    )
-    parser.add_argument(
-        "--version",
-        type=str,
-        help="Override version (default: from VERSION file or env)"
-    )
-    parser.add_argument(
-        "--sign-key",
-        type=str,
-        help="Path to signing key (default: RELEASE_SIGN_KEY_PATH env var)"
-    )
+    if not os.path.exists(ARTIFACTS_DIR):
+        os.makedirs(ARTIFACTS_DIR)
+        
+    run_governance_gate()
     
-    args = parser.parse_args()
+    print("======================================================================")
+    print("STEP 2: Building Release Artifacts")
+    print("======================================================================")
     
-    # Get version
-    version = args.version or get_version()
-    print(f"\n[INFO] Release version: {version}")
+    # Correct Usage of timezone.utc
+    manifest = {
+        "version": os.environ.get("VERSION", "1.0.0-rc1"),
+        "build_date": datetime.now(timezone.utc).isoformat(),
+        "artifacts": []
+    }
     
-    # Ensure artifacts directory exists
-    ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+    # 1. Core Bundle
+    core_content = [
+        "ransomeye_core", "ransomeye_db_core", "ransomeye_ai_core", 
+        "ransomeye_threat_intel", "ransomeye_killchain", "ransomeye_response", 
+        "ransomeye_east_west_ml", "ransomeye_llm_summarizer", "ransomeye_ui", 
+        "install.sh", "requirements.txt"
+    ]
+    manifest["artifacts"].append(build_artifact("core", core_content))
     
-    # Step 1: Check gates (unless skipped)
-    if not args.skip_gates:
-        if not check_gates():
-            sys.exit(1)
-    else:
-        print("⚠️  WARNING: Gate checks skipped (--skip-gates)")
+    # 2. Linux Agent
+    manifest["artifacts"].append(build_artifact("linux_agent", ["ransomeye_linux_agent"]))
     
-    # Step 2: Package Core
-    print("\n" + "=" * 70)
-    print("[STEP 2] Packaging Core Engine...")
-    print("=" * 70)
-    try:
-        core_packager = CorePackager(project_root=PROJECT_ROOT, version=version)
-        core_archive = core_packager.package()
-        if not core_archive:
-            print("❌ Core packaging failed")
-            sys.exit(1)
-        print(f"✅ Core packaged: {core_archive}")
-    except Exception as e:
-        print(f"❌ Core packaging error: {e}")
-        sys.exit(1)
+    # 3. Windows Agent
+    manifest["artifacts"].append(build_artifact("windows_agent", ["ransomeye_windows_agent"], type="zip"))
     
-    # Step 3: Package Agents
-    print("\n" + "=" * 70)
-    print("[STEP 3] Packaging Standalone Agents...")
-    print("=" * 70)
-    try:
-        agent_packager = AgentPackager(project_root=PROJECT_ROOT, version=version)
-        agent_archives = agent_packager.package_all()
-        if not agent_archives:
-            print("❌ Agent packaging failed")
-            sys.exit(1)
-        print(f"✅ Agents packaged: {len(agent_archives)} archive(s)")
-        for archive in agent_archives:
-            print(f"   - {archive}")
-    except Exception as e:
-        print(f"❌ Agent packaging error: {e}")
-        sys.exit(1)
+    # 4. DPI Probe
+    manifest["artifacts"].append(build_artifact("dpi_probe", ["ransomeye_dpi_probe"]))
     
-    # Step 4: Sign artifacts
-    print("\n" + "=" * 70)
-    print("[STEP 4] Signing Artifacts...")
-    print("=" * 70)
-    sign_key_path = args.sign_key or os.environ.get("RELEASE_SIGN_KEY_PATH")
-    if sign_key_path:
-        try:
-            signer = ArtifactSigner(sign_key_path=Path(sign_key_path))
-            all_archives = [core_archive] + agent_archives
-            signed_count = signer.sign_all(all_archives)
-            print(f"✅ Signed {signed_count} artifact(s)")
-        except Exception as e:
-            print(f"⚠️  Signing error: {e}")
-            print("Continuing without signatures...")
-    else:
-        # Silent skip if no signing key (optional for development builds)
-        print("✅ Signing skipped (no key provided)")
+    # Manifest
+    manifest_path = os.path.join(ARTIFACTS_DIR, "release_manifest.json")
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f, indent=4)
+        
+    print(f"\n📝 Manifest created: {manifest_path}")
+    sign_artifact(manifest_path)
     
-    # Step 5: Generate manifests
-    print("\n" + "=" * 70)
-    print("[STEP 5] Generating Release Manifests...")
-    print("=" * 70)
-    try:
-        manifest_gen = ManifestGenerator(artifacts_dir=ARTIFACTS_DIR, version=version)
-        manifest_gen.generate()
-        print("✅ Manifests generated:")
-        print(f"   - {ARTIFACTS_DIR / 'release_manifest.json'}")
-        print(f"   - {ARTIFACTS_DIR / 'SHA256SUMS'}")
-    except Exception as e:
-        print(f"❌ Manifest generation error: {e}")
-        sys.exit(1)
-    
-    # Final summary
-    print("\n" + "=" * 70)
-    print("✅ RELEASE BUILD COMPLETE")
-    print("=" * 70)
-    print(f"Version: {version}")
-    print(f"Artifacts directory: {ARTIFACTS_DIR}")
-    print("\nGenerated artifacts:")
-    for archive in [core_archive] + agent_archives:
-        print(f"  - {Path(archive).name}")
-        sig_file = Path(str(archive) + ".sig")
-        if sig_file.exists():
-            print(f"    Signature: {sig_file.name}")
-    print(f"\nManifests:")
-    print(f"  - release_manifest.json")
-    print(f"  - SHA256SUMS")
-    print("\n" + "=" * 70)
-
+    print("\n======================================================================")
+    print("BUILD SUCCESSFUL")
+    print("======================================================================")
 
 if __name__ == "__main__":
     main()
-
